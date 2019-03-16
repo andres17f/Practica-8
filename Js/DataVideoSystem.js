@@ -335,22 +335,33 @@ function showHomePage() {
 
 	contentP.appendChild(divList);
 
-	var video = VideoSystem.getInstance();
-	var categories = video.categories;
-	var category = categories.next();
-	while (category.done !== true){
+	//Aqui estableceremos como se han de recorrer los datos, ahora se hara desde indexDb de la siguiente manera
+	var request = indexedDB.open(nameDB);
 
-		var butEle = document.createElement("button");
-		butEle.setAttribute("class","list-group-item list-group-item-action text-center btn");
-		butEle.setAttribute("value",category.value.name);
-		var textB = document.createTextNode(category.value.name);
-		butEle.appendChild(textB);
-		
-		divList.appendChild(butEle);
-		
-		butEle.addEventListener("click",showProductionsC);
+	request.onsuccess = function(event) {
 
-		category = categories.next();
+		var db = event.target.result;         
+		var objectStore = db.transaction(["categorias"],"readonly").objectStore("categorias");
+		//Abre un cursor y reccorre los datos devueltos 
+		objectStore.openCursor().onsuccess = function(event) {
+			
+			var category = event.target.result;
+
+			if (category) {
+
+				var butEle = document.createElement("button");
+				butEle.setAttribute("class","list-group-item list-group-item-action text-center btn");
+				butEle.setAttribute("value",category.value.name);
+				var textB = document.createTextNode(category.value.name);
+				butEle.appendChild(textB);
+		
+				divList.appendChild(butEle);
+		
+				butEle.addEventListener("click",showProductionsC);
+
+			category.continue();
+			}
+		}
 	}
 
 	var divCatd = document.createElement("div");
@@ -374,43 +385,54 @@ function showHomePage() {
 	divCatd.appendChild(div1);
 	div1.appendChild(div2);
 
-	var productions = video.productions;
-	var production = productions.next();
 	var count = 0;
-	while (production.done !== true){
 
-		if ( count <= 0 ) {
+	var request2 = indexedDB.open(nameDB);
 
-			var div3 = document.createElement("div");
-			div3.setAttribute("class","carousel-item active");
+	request2.onsuccess = function(event) {
 
-			var imgC = document.createElement("img");
-			imgC.setAttribute("class","d-block w-100");
-			imgC.setAttribute("src",production.value.image);
-			imgC.setAttribute("alt",production.value.title);
-
+		var db = event.target.result;         
+		var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+		//Abre un cursor y reccorre los datos devueltos 
+		objectStore.openCursor().onsuccess = function(event) {
 			
-			div2.appendChild(div3);
-			div3.appendChild(imgC);
+			var production = event.target.result;
 
-			count = count+1;
+			if (production) {
 
-		} else {
+				if ( count <= 0 ) {
 
-			var div3 = document.createElement("div");
-			div3.setAttribute("class","carousel-item");
+					var div3 = document.createElement("div");
+					div3.setAttribute("class","carousel-item active");
 
-			var imgC = document.createElement("img");
-			imgC.setAttribute("class","d-block w-100");
-			imgC.setAttribute("src","img/"+production.value.title+".jpg");
-			imgC.setAttribute("alt",production.value.title);
+					var imgC = document.createElement("img");
+					imgC.setAttribute("class","d-block w-100");
+					imgC.setAttribute("src",production.value.image);
+					imgC.setAttribute("alt",production.value.title);
 
-			div2.appendChild(div3);
-			div3.appendChild(imgC);
+					
+					div2.appendChild(div3);
+					div3.appendChild(imgC);
+
+					count = count+1;
+
+				} else {
+
+					var div3 = document.createElement("div");
+					div3.setAttribute("class","carousel-item");
+
+					var imgC = document.createElement("img");
+					imgC.setAttribute("class","d-block w-100");
+					imgC.setAttribute("src","img/"+production.value.title+".jpg");
+					imgC.setAttribute("alt",production.value.title);
+
+					div2.appendChild(div3);
+					div3.appendChild(imgC);
+				}
+				production.continue();
+			}
 		}
-	
-		production = productions.next();
-	}
+	}			
 
 	var titleF = document.createElement("h5");
 	titleF.setAttribute("class","text-center mb-1");
@@ -552,57 +574,65 @@ function showCategories(){
 
 	}
 
-	var video = VideoSystem.getInstance();
-	var categories = video.categories;
-	var category = categories.next();
-	while (category.done !== true){
+	var request = indexedDB.open(nameDB);
 
-		var colum = document.createElement("div");
-		colum.setAttribute("class","col-6 col-md-4 mb-4");
-		var content = document.createElement("div");
-		content.setAttribute("class","card");
-		var image = document.createElement("img");
-		image.setAttribute("class","card-img-top");
+	request.onsuccess = function(event) {
 
-		image.setAttribute("src","img/"+category.value.name+".jpg");
-		image.setAttribute("alt",category.value.name);
+		var db = event.target.result;         
+		var objectStore = db.transaction(["categorias"],"readonly").objectStore("categorias");
+		//Abre un cursor y reccorre los datos devueltos 
+		objectStore.openCursor().onsuccess = function(event) {
+			
+			var category = event.target.result;
 
-		var body = document.createElement("div");
-		body.setAttribute("class","card-body");
-		var paragraph = document.createElement("h5");
-		paragraph.setAttribute("class","card-text font-weight-bold");
-		paragraph.setAttribute("style","max-height:45px; overflow:hidden; min-height:45px");
-		var text = document.createTextNode(category.value.name);
-		paragraph.appendChild(text);
+			if (category) {
 
-		var divbuttons = document.createElement("div");
-		divbuttons.setAttribute("class","d-flex justify-content-between");
+				var colum = document.createElement("div");
+				colum.setAttribute("class","col-6 col-md-4 mb-4");
+				var content = document.createElement("div");
+				content.setAttribute("class","card");
+				var image = document.createElement("img");
+				image.setAttribute("class","card-img-top");
 
-		var button = document.createElement("button");
-		button.setAttribute("class","btn btn-primary");
-		button.setAttribute("id","buttonC");
-		button.setAttribute("type","button");
-		button.setAttribute("value",category.value.name);
-		var textB = document.createTextNode("Ver Producciones");
-		button.appendChild(textB);
+				image.setAttribute("src","img/"+category.value.name+".jpg");
+				image.setAttribute("alt",category.value.name);
 
-		contentP.appendChild(colum);
-		colum.appendChild(content);
-		content.appendChild(body);
-		body.appendChild(image);
-		body.appendChild(paragraph);
-		body.appendChild(divbuttons);
-		divbuttons.appendChild(button);
-		
-		button.addEventListener("click",showProductionsC);
+				var body = document.createElement("div");
+				body.setAttribute("class","card-body");
+				var paragraph = document.createElement("h5");
+				paragraph.setAttribute("class","card-text font-weight-bold");
+				paragraph.setAttribute("style","max-height:45px; overflow:hidden; min-height:45px");
+				var text = document.createTextNode(category.value.name);
+				paragraph.appendChild(text);
 
-		category = categories.next();
+				var divbuttons = document.createElement("div");
+				divbuttons.setAttribute("class","d-flex justify-content-between");
+
+				var button = document.createElement("button");
+				button.setAttribute("class","btn btn-primary");
+				button.setAttribute("id","buttonC");
+				button.setAttribute("type","button");
+				button.setAttribute("value",category.value.name);
+				var textB = document.createTextNode("Ver Producciones");
+				button.appendChild(textB);
+
+				contentP.appendChild(colum);
+				colum.appendChild(content);
+				content.appendChild(body);
+				body.appendChild(image);
+				body.appendChild(paragraph);
+				body.appendChild(divbuttons);
+				divbuttons.appendChild(button);
+				
+				button.addEventListener("click",showProductionsC);
+				category.continue();
+			}
+		}
 	}
-
 	
 }
 
-//Funcion que mostrara las producciones a partir de una categoria.
+//Funcion que mostrara las producciones a partir de una categoria. FALTA MODIFICAR POR NO RELACIONES
 function showProductionsC(){
 	
 	var cat = this.value;
@@ -733,48 +763,58 @@ function showProductions(){
 
 	}
 
-	video = VideoSystem.getInstance();
-	var productions = video.productions;
-	var production = productions.next();
-	while (production.done !== true){
+	var request = indexedDB.open(nameDB);
 
-		var colum = document.createElement("div");
-		colum.setAttribute("class","col-6 col-md-4 mb-4");
-		var content = document.createElement("div");
-		content.setAttribute("class","card");
-		var image = document.createElement("img");
-		image.setAttribute("class","card-img-top");
+    request.onsuccess = function(event) {
 
-		image.setAttribute("src",production.value.image);
-		image.setAttribute("alt",production.value.title);
+        var db = event.target.result;         
+        var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+        //Abre un cursor y reccorre los datos devueltos 
+        objectStore.openCursor().onsuccess = function(event) {
+            
+            var production = event.target.result;
 
-		var body = document.createElement("div");
-		body.setAttribute("class","card-body");
-		var paragraph = document.createElement("p");
-		paragraph.setAttribute("class","card-text font-weight-bold");
-		paragraph.setAttribute("style","min-height:45px ; max-height:45px ; overflow:hidden");
-		var text = document.createTextNode(production.value.title);
-		paragraph.appendChild(text);
+            if (production) {
 
-		var button = document.createElement("button");
-		button.setAttribute("class","btn btn-primary");
-		button.setAttribute("id","buttonC");
-		button.setAttribute("type","button");
-		button.setAttribute("value",production.value.title);
-		var textB = document.createTextNode("Ver Produccion");
-		button.appendChild(textB);
-				
-		contentP.appendChild(colum);
-		colum.appendChild(content);
-		content.appendChild(body);
-		body.appendChild(image);
-		body.appendChild(paragraph);
-		body.appendChild(button);
+				var colum = document.createElement("div");
+				colum.setAttribute("class","col-6 col-md-4 mb-4");
+				var content = document.createElement("div");
+				content.setAttribute("class","card");
+				var image = document.createElement("img");
+				image.setAttribute("class","card-img-top");
 
-		button.addEventListener("click",showProductionAlone);
-				
-		production = productions.next();
-	}
+				image.setAttribute("src",production.value.image);
+				image.setAttribute("alt",production.value.title);
+
+				var body = document.createElement("div");
+				body.setAttribute("class","card-body");
+				var paragraph = document.createElement("p");
+				paragraph.setAttribute("class","card-text font-weight-bold");
+				paragraph.setAttribute("style","min-height:45px ; max-height:45px ; overflow:hidden");
+				var text = document.createTextNode(production.value.title);
+				paragraph.appendChild(text);
+
+				var button = document.createElement("button");
+				button.setAttribute("class","btn btn-primary");
+				button.setAttribute("id","buttonC");
+				button.setAttribute("type","button");
+				button.setAttribute("value",production.value.title);
+				var textB = document.createTextNode("Ver Produccion");
+				button.appendChild(textB);
+						
+				contentP.appendChild(colum);
+				colum.appendChild(content);
+				content.appendChild(body);
+				body.appendChild(image);
+				body.appendChild(paragraph);
+				body.appendChild(button);
+
+				button.addEventListener("click",showProductionAlone);
+				production.continue();
+            }
+        }
+    }
+	
 }
 
 //Funcion que mostrara los actores desde el menu
@@ -835,47 +875,58 @@ function showActors(){
 
 	}
 
-	var video = VideoSystem.getInstance();
-	var actors = video.actors;
-	var actor = actors.next();
-	while (actor.done !== true){
+	var request = indexedDB.open(nameDB);
 
-		var colum = document.createElement("div");
-		colum.setAttribute("class","col-6 col-md-4 mb-4");
-		var content = document.createElement("div");
-		content.setAttribute("class","card");
-		var image = document.createElement("img");
-		image.setAttribute("class","card-img-top");
-		image.setAttribute("src",actor.value.picture);
-		image.setAttribute("alt",actor.value.name);
+    request.onsuccess = function(event) {
 
-		var body = document.createElement("div");
-		body.setAttribute("class","card-body");
-		var paragraph = document.createElement("p");
-		paragraph.setAttribute("class","card-text font-weight-bold");
-		paragraph.setAttribute("style","max-height:45px; overflow:hidden; min-height:45px");
-		var text = document.createTextNode(actor.value.name+" "+actor.value.lastName1);
-		paragraph.appendChild(text);
+        var db = event.target.result;         
+        var objectStore = db.transaction(["actores"],"readonly").objectStore("actores");
+        //Abre un cursor y reccorre los datos devueltos 
+        objectStore.openCursor().onsuccess = function(event) {
+            
+            var actor = event.target.result;
 
-		var button = document.createElement("button");
-		button.setAttribute("class","btn btn-primary");
-		button.setAttribute("id","buttonC");
-		button.setAttribute("type","button");
-		button.setAttribute("value",actor.value.name);
-		var textB = document.createTextNode("Biografia");
-		button.appendChild(textB);
-		
-		contentP.appendChild(colum);
-		colum.appendChild(content);
-		content.appendChild(body);
-		body.appendChild(image);
-		body.appendChild(paragraph);
-		body.appendChild(button);
+            if (actor) {
 
-		button.addEventListener("click",showActorAlone);
+				var colum = document.createElement("div");
+				colum.setAttribute("class","col-6 col-md-4 mb-4");
+				var content = document.createElement("div");
+				content.setAttribute("class","card");
+				var image = document.createElement("img");
+				image.setAttribute("class","card-img-top");
+				image.setAttribute("src",actor.value.picture);
+				image.setAttribute("alt",actor.value.name);
 
-		actor = actors.next();
-	}
+				var body = document.createElement("div");
+				body.setAttribute("class","card-body");
+				var paragraph = document.createElement("p");
+				paragraph.setAttribute("class","card-text font-weight-bold");
+				paragraph.setAttribute("style","max-height:45px; overflow:hidden; min-height:45px");
+				var text = document.createTextNode(actor.value.name+" "+actor.value.lastName1);
+				paragraph.appendChild(text);
+
+				var button = document.createElement("button");
+				button.setAttribute("class","btn btn-primary");
+				button.setAttribute("id","buttonC");
+				button.setAttribute("type","button");
+				button.setAttribute("value",actor.value.name);
+				var textB = document.createTextNode("Biografia");
+				button.appendChild(textB);
+				
+				contentP.appendChild(colum);
+				colum.appendChild(content);
+				content.appendChild(body);
+				body.appendChild(image);
+				body.appendChild(paragraph);
+				body.appendChild(button);
+
+				button.addEventListener("click",showActorAlone);
+				actor.continue();
+            }
+        }
+    }
+
+	
 }
 
 //Funcion que mostrara los directores
@@ -936,47 +987,58 @@ function ShowDirectors() {
 
 	}
 
-	var video = VideoSystem.getInstance();
-	var directors = video.directors;
-	var director = directors.next();
-	while (director.done !== true){
+	var request = indexedDB.open(nameDB);
 
-		var colum = document.createElement("div");
-		colum.setAttribute("class","col-6 col-md-4 mb-4");
-		var content = document.createElement("div");
-		content.setAttribute("class","card");
-		var image = document.createElement("img");
-		image.setAttribute("class","card-img-top");
+    request.onsuccess = function(event) {
 
-		image.setAttribute("src",director.value.picture);
-		image.setAttribute("alt",director.value.name);
+        var db = event.target.result;         
+        var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
+        //Abre un cursor y reccorre los datos devueltos 
+        objectStore.openCursor().onsuccess = function(event) {
+            
+            var director = event.target.result;
 
-		var body = document.createElement("div");
-		body.setAttribute("class","card-body");
-		var paragraph = document.createElement("p");
-		paragraph.setAttribute("class","card-text font-weight-bold");
-		var text = document.createTextNode(director.value.name+" "+director.value.lastName1);
-		paragraph.appendChild(text);
+            if (director) {
 
-		var button = document.createElement("button");
-		button.setAttribute("class","btn btn-primary");
-		button.setAttribute("id","buttonC");
-		button.setAttribute("type","button");
-		button.setAttribute("value",director.value.name);
-		var textB = document.createTextNode("Biografia");
-		button.appendChild(textB);
-		
-		contentP.appendChild(colum);
-		colum.appendChild(content);
-		content.appendChild(body);
-		body.appendChild(image);
-		body.appendChild(paragraph);
-		body.appendChild(button);
+				var colum = document.createElement("div");
+				colum.setAttribute("class","col-6 col-md-4 mb-4");
+				var content = document.createElement("div");
+				content.setAttribute("class","card");
+				var image = document.createElement("img");
+				image.setAttribute("class","card-img-top");
 
-		button.addEventListener("click",showDirectorAlone);
+				image.setAttribute("src",director.value.picture);
+				image.setAttribute("alt",director.value.name);
 
-		director = directors.next();
-	}
+				var body = document.createElement("div");
+				body.setAttribute("class","card-body");
+				var paragraph = document.createElement("p");
+				paragraph.setAttribute("class","card-text font-weight-bold");
+				var text = document.createTextNode(director.value.name+" "+director.value.lastName1);
+				paragraph.appendChild(text);
+
+				var button = document.createElement("button");
+				button.setAttribute("class","btn btn-primary");
+				button.setAttribute("id","buttonC");
+				button.setAttribute("type","button");
+				button.setAttribute("value",director.value.name);
+				var textB = document.createTextNode("Biografia");
+				button.appendChild(textB);
+				
+				contentP.appendChild(colum);
+				colum.appendChild(content);
+				content.appendChild(body);
+				body.appendChild(image);
+				body.appendChild(paragraph);
+				body.appendChild(button);
+
+				button.addEventListener("click",showDirectorAlone);
+                director.continue();
+            }
+        }
+    }
+
+
 }
 
 //Funcion que muestra a un solo actor con su informacion.

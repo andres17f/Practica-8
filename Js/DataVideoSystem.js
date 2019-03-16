@@ -1,4 +1,59 @@
-//Lo primero es crear una funcion initiPopulate para crear todos los datos que carga el videoSystem
+//Funcion para crear la base de datos
+//Creamos dos arrays von recursos y temporadas del sistema
+var arrayResources = new Array();
+var arraySeasons = new Array();
+
+var version = 1;
+nameDB = "VideoSystemDB";
+//Funcion que crea la base de datos y las tablas que necesitamos
+function createTables(){
+
+	if(!window.indexedDB){
+		window.alert("El navegador no implementa IndexedDB.");
+	}
+
+	var db = indexedDB.open(nameDB, version);
+
+	//El onupgradneed se ejecutara la primera vez y nos establecera la estructura del IndexDB
+	db.onupgradeneeded = function (e) {  
+		
+		var active = db.result;
+
+		active.createObjectStore("categorias", { keyPath: 'name' });	
+		active.createObjectStore("producciones", { keyPath: 'title'	});
+		active.createObjectStore("actores", { keyPath: 'name' });
+		active.createObjectStore("directores", { keyPath: 'name' });
+		active.createObjectStore("usuarios", { keyPath: 'user' });
+
+		active.createObjectStore("categoryPro", { keyPath: 'category' });
+		active.createObjectStore("directorPro", { keyPath: 'name' });
+		active.createObjectStore("actorPro", { keyPath: 'nsme' });
+	};
+}
+
+//Funcion que nos carga los valores iniciales desde el init en un tabla con los objets en un array
+function loadDates(table,array) {
+	
+	var request = indexedDB.open(nameDB);
+	
+	request.onsuccess = function(event) {
+
+		//La variable db es la base de datos, y abre la tabla con el nombre pasado en lectura/escritura
+		var db = event.target.result;         
+		
+		var addObject = db.transaction([table],"readwrite").objectStore(table);
+		
+		for (var i in array) {
+			
+			var addObjectStore = addObject.add(array[i].getObject());
+		
+		}
+		
+	};
+}
+
+
+//Funcion init que no proporcionara los datos iniciales que carga el videoSystem en la base
 function initPopulate(){
 	
 	//Se crean los Person
@@ -96,14 +151,32 @@ function initPopulate(){
 	} catch (error) {
 		console.log("" + error);
 	}
-	
+
 	//Creamos VideoSystem
 	try {
 		var video = VideoSystem.getInstance();
 	} catch (error) {
 		console.log("" + error);
 	}
+	
+	//Despues de crear los objetos se añaden al indexDB
+	var arrayCategories = [category1,category2,category3,category4,category5,category6,category7];
+	loadDates("categorias",arrayCategories);
 
+	var arrayProductions = [movie1,movie2,movie3,movie4,movie5,movie6,movie7,serie1,serie2,serie3];
+	loadDates("producciones",arrayProductions);
+	
+	var arrayDirectors = [persona1,persona2,persona3,persona4,persona5,persona6,persona7,persona8];
+	loadDates("directores",arrayDirectors);
+
+	var arrayActors = [persona9,persona10,persona11,persona12];
+	loadDates("actores",arrayActors);
+	
+	//Se crea el array con los usuarios y se pasa a la funcion
+	var arrayUsers = [user1,user2,userPrueba];
+	loadDates("usuarios",arrayUsers);
+
+	//Aparte de cargar datos a la base los mantendremos en el videoSystem para agilizar
 	//Añadimos las categorias 
 	try {
 		video.addCategory(category1);
@@ -113,7 +186,6 @@ function initPopulate(){
 		video.addCategory(category5);
 		video.addCategory(category6);
 		video.addCategory(category7);
-
 	} catch (error) {
 		console.log("" + error);
 	}
@@ -130,7 +202,6 @@ function initPopulate(){
 		video.addProduction(serie1);
 		video.addProduction(serie2);
 		video.addProduction(serie3);
-
 	} catch (error) {
 		console.log("" + error);
 	}
@@ -210,6 +281,7 @@ function initPopulate(){
 	} catch (error) {
 		console.log("" + error);
 	}
+	
 }
 
 //Funcion que mostrara el menu navegable
@@ -1521,11 +1593,14 @@ function showResource() {
 
 }
 
-//Funcion que invoca todas las funciones necesarias.
+//Funcion que inicia y carga la base de datos.
 function init(){
+	createTables();
 	initPopulate();
 	menuPopulate();
 	showHomePage();
+
+
 }
 
 window.onload = init;

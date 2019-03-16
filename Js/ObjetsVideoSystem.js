@@ -95,6 +95,16 @@ Person.prototype.constructor = Person;
 Person.prototype.toString = function(){
 	return "Nombre: " + this.name + " Apellido1: " + this.lastName1 + " Apellido2: " 
 	+ this.lastName2 + " Nacimiento: "+ this.born + " Imagen: "+ this.picture;
+}
+Person.prototype.getObject = function(){
+	return {
+		name: this.name,
+		lastName1: this.lastName1,
+		lastName2: this.lastName2,
+		born: this.born,
+		picture: this.picture,
+
+	};
 };
 
 //Objeto para crear una categoria.
@@ -142,6 +152,12 @@ Category.prototype = {};
 Category.prototype.constructor = Category;
 Category.prototype.toString = function(){
 	return "Nombre: " + this.name + " Descripcion: "+ this.description;
+}
+Category.prototype.getObject = function(){
+	return {
+		name: this.name,
+		description: this.description
+	};
 };
 
 //Objeto para crear un recurso.
@@ -224,6 +240,14 @@ Resource.prototype.constructor = Resource;
 Resource.prototype.toString = function(){
 	return "Duracion: " + this.duration + " Link: " + this.link + " Audio: " + this.audios 
 	+ " Subtitulos: " + this.subtitles;
+}
+Resource.prototype.getObject = function(){
+	return {
+		duration: this.duration,
+		link: this.link,
+		audios: this.audios,
+		subtitles: this.subtitles
+	};
 };
 
 //Objeto abstracto Production que heradara a Movie y Serie
@@ -323,6 +347,15 @@ Resource.prototype.toString = function(){
 		return "Titulo: " + this.title + " Nacionalidad: " + this.nationality + " Publicacion: " + 
 		this.publication + " Sipnosis: " + this.synopsis + " Imagen: " + this.image;
 	}
+	Production.prototype.getObject = function(){
+		return {
+			title: this.title,
+			nationality: this.nationality,
+			publication: this.publication,
+			synopsis: this.synopsis,
+			image: this.image
+		};
+	};
 
 	//Objeto subclase Movie.
 	function Movie(title, nationality, publication, synopsis, image, resource = null, locations = null){
@@ -370,7 +403,18 @@ Resource.prototype.toString = function(){
 	Movie.prototype.toString = function(){
 		return Production.prototype.toString.call(this) + " Recurso: " + this.resource +
 		" Coordenadas: " + this.locations;
-	}
+	};
+	Movie.prototype.getObject = function(){
+		return {
+			title: this.title,
+			nationality: this.nationality,
+			publication: this.publication,
+			synopsis: this.synopsis,
+			image: this.image,
+			resource: this.resource,
+			locations: this.locations
+		};
+	};
 	
 	//Objeto subclase Movie.
 	function Serie(title, nationality, publication, synopsis, image, seasons = null){
@@ -403,6 +447,16 @@ Resource.prototype.toString = function(){
 	Serie.prototype.toString = function(){
 		return Production.prototype.toString.call(this) + " Temporadas: " + this.season;
 	}
+	Serie.prototype.getObject = function(){
+		return {
+			title: this.title,
+			nationality: this.nationality,
+			publication: this.publication,
+			synopsis: this.synopsis,
+			image: this.image,
+			seasons: this.season
+		};
+	};
 
 	abstractCreateLock = true;
 
@@ -455,6 +509,12 @@ Season.prototype = {};
 Season.prototype.constructor = Season;
 Season.prototype.toString = function(){
 	return "Title: " + this.title + " Episodios: " + this.episodes;
+}
+Season.prototype.getObject = function(){
+	return {
+		title: this.title,
+		episodes: this.episodes
+	};
 };
 
 //Objeto para crear un usuario.
@@ -521,6 +581,13 @@ User.prototype = {};
 User.prototype.constructor = User;
 User.prototype.toString = function(){
 	return "Nombre Usuario: " + this.userName + ". Email: "+ this.email + ". Pass: " + this.password;
+}
+User.prototype.getObject = function(){
+	return {
+		userName: this.userName,
+		email: this.email,
+		password: this.password
+	};
 };
 
 //Objeto para crear unas coordenadas.
@@ -569,5 +636,11 @@ Coordinate.prototype = {};
 Coordinate.prototype.constructor = Coordinate;
 Coordinate.prototype.toString = function(){
 	return "Latitude: " + this.latitude + ". Longitud: "+ this.longitude;
+}
+Coordinate.prototype.getObject = function(){
+	return {
+		latitude: this.latitude,
+		longitude: this.longitude
+	};
 };
 

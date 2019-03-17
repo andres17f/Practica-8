@@ -1214,9 +1214,9 @@ function showAssigns() {
   formAsigns1.appendChild(divList1);
   
   //CATEGORIAS
-  var request = indexedDB.open(nameDB);
+  var request1 = indexedDB.open(nameDB);
 
-  request.onsuccess = function(event) {
+  request1.onsuccess = function(event) {
 
       var db = event.target.result;         
       var objectStore = db.transaction(["categorias"],"readonly").objectStore("categorias");
@@ -1226,7 +1226,7 @@ function showAssigns() {
         var category = event.target.result;
 
         if (category) {
-
+          console.log(category.value.name);
           var Cn = (category.value.name);
           //Abre la conexion con la base de datos
           var request2 = indexedDB.open(nameDB);
@@ -1240,11 +1240,11 @@ function showAssigns() {
 
             object.onsuccess = function(event) {
                   
-              var prodD = event.target.result;
+              var prodC = event.target.result;
                   
-              for (var i = 0; i < prodD.productions.length; i++) {
+              for (var i = 0; i < prodC.productions.length; i++) {
                   
-                if (prodD.productions[i].title == productionSelected) {
+                if (prodC.productions[i].title == productionSelected) {
                     
                   var option = document.createElement("option");
                   option.setAttribute("value",Cn);
@@ -1261,8 +1261,6 @@ function showAssigns() {
         }
       }
     }
-
-
 
   var br1 = document.createElement ("button");
 	br1.setAttribute("class","btn btn-secondary btn-lg mt-2");
@@ -1302,9 +1300,9 @@ function showAssigns() {
   //DIRECTORES
   //PARA MOSTRAR LOS DIRECTORES ASIGNADOS
   //Para mostrar los directores
-  var request2 = indexedDB.open(nameDB);
+  var request3 = indexedDB.open(nameDB);
 
-  request2.onsuccess = function(event) {
+  request3.onsuccess = function(event) {
 
   var db = event.target.result;         
   var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
@@ -1320,9 +1318,9 @@ function showAssigns() {
         var Dn = (director.value.name);
         var Dnl = (director.value.name+" "+director.value.lastName1);
         //Abre la conexion con la base de datos
-        var request2 = indexedDB.open(nameDB);
+        var request4 = indexedDB.open(nameDB);
 
-        request2.onsuccess = function(event) {
+        request4.onsuccess = function(event) {
 
           var db = event.target.result;         
           var objectStore = db.transaction(["directorProduccion"],"readonly").objectStore("directorProduccion");
@@ -1339,7 +1337,7 @@ function showAssigns() {
               
                 var option = document.createElement("option");
                 option.setAttribute("value",Dn);
-                var textop = document.createTextNode(Dn);
+                var textop = document.createTextNode(Dnl);
                 option.appendChild(textop);
             
                 divList2.appendChild(option);
@@ -1347,9 +1345,8 @@ function showAssigns() {
               }
             }
           }
-            
         }
-        director.continue();
+        director.continue(); 
       }
     }
   }
@@ -1392,7 +1389,7 @@ function showAssigns() {
   //Actores
   //PARA MOSTRAR LOS ACTORES ASIGNADOS
   //Para mostrar los actores
-      
+
   var request3 = indexedDB.open(nameDB);
 
   request3.onsuccess = function(event) {
@@ -1439,9 +1436,8 @@ function showAssigns() {
             }
           }
         }
-          
+        actor.continue(); 
       }
-      actor.continue();
     }
   }
 
@@ -1547,19 +1543,30 @@ function desasignActor() {
 //Funcion que mostrara lo que no tiene asignado una produccion y se le puede asignar
 function showDesasingns() {
   var productionSelected = document.forms["asgProduction"]["selectTitleS"].value;
+  var objectpro = "";
 
   //Recorro todas las producciones para seleccionarla y mandarla en los input
-  var video = VideoSystem.getInstance();
-  var productions = video.productions;
-	var production = productions.next();
-	while (production.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    if (production.value.title == productionSelected) {
+  request.onsuccess = function(event) {
 
-      var objectpro = production.value;
-        
-    }
-      production = productions.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+      //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+          
+      var production = event.target.result;
+
+        if (production) {
+
+          if (production.value.title == productionSelected) {
+      
+            objectpro = production.value;
+       
+          }
+          production.continue();
+        }
+      }
   }
 
   var contentP = document.getElementById("principal");
@@ -1593,44 +1600,60 @@ function showDesasingns() {
   div1.appendChild(formDes1);
   formDes1.appendChild(divList1);
   
+  //CATEGORIAS
   //Recorro todas las categorias del sistema
-  var video = VideoSystem.getInstance();
-  var search = true;
-  var categories = video.categories;
-  var category = categories.next();
-  while (category.done !== true){
+  var request1 = indexedDB.open(nameDB);
 
-    //Obtengo las producciones de esa categoria
-    var productions = video.getProductionsCategory(category.value);
-    var production = productions.next();
-    while (production.done !== true){
+  request1.onsuccess = function(event) {
 
-      if (production.value.title == productionSelected) {
+      var db = event.target.result;         
+      var objectStore = db.transaction(["categorias"],"readonly").objectStore("categorias");
+        //Abre un cursor y reccorre los datos devueltos 
+      objectStore.openCursor().onsuccess = function(event) {
+            
+        var category = event.target.result;
+        var search = true;
+        if (category) {
 
-        search = false;
-        
+          var Cn = (category.value.name);
+          //Abre la conexion con la base de datos
+          var request2 = indexedDB.open(nameDB);
+
+          request2.onsuccess = function(event) {
+
+            var db = event.target.result;         
+            var objectStore = db.transaction(["categoriaProduccion"],"readonly").objectStore("categoriaProduccion");
+
+            var object = objectStore.get(Cn);
+
+            object.onsuccess = function(event) {
+                  
+              var prodC = event.target.result;
+                  
+              for (var i = 0; i < prodC.productions.length; i++) {
+                  
+                if (prodC.productions[i].title == productionSelected) {
+
+                    search = false;
+
+                }
+              }
+
+              if (search) {
+
+                var option = document.createElement("option");
+                option.setAttribute("value",Cn);
+                var textop = document.createTextNode(Cn);
+                option.appendChild(textop);
+                  
+                divList1.appendChild(option);
+              }
+            }
+          }
+          category.continue();
+        }
       }
-
-      production = productions.next();
-      
     }
-
-    if (search) {
-
-      var option = document.createElement("option");
-      option.setAttribute("value",category.value.name);
-      var textop = document.createTextNode(category.value.name);
-      option.appendChild(textop);
-    
-      divList1.appendChild(option);
-
-    }
-
-    search = true;
-
-    category = categories.next();
-
-  }
 
   var br1 = document.createElement ("button");
 	br1.setAttribute("class","btn btn-secondary btn-lg mt-2");
@@ -1667,34 +1690,61 @@ function showDesasingns() {
   div2.appendChild(formDes2);
   formDes2.appendChild(divList2);
 
-  //Recorro todas las directores del sistema
-  var directors = video.directors;
-  var director = directors.next();
-  while (director.done !== true){
+  //DIRECTORES
 
-    //Recorro todas las producciones del director
-    var productions = video.getProductionsDirector(director.value);
-    var production = productions.next();
-    while (production.done !== true){
-          
-      if(production.value.title !== productionSelected){
+    //PARA MOSTRAR LOS DIRECTORES ASIGNADOS
+  //Para mostrar los directores
+  var request3 = indexedDB.open(nameDB);
 
-      var option = document.createElement("option");
-      option.setAttribute("value",director.value.name);
-      var textop = document.createTextNode(director.value.name + " " + director.value.lastName1);
-      option.appendChild(textop);
+  request3.onsuccess = function(event) {
+
+  var db = event.target.result;         
+  var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+      
+      var director = event.target.result;
+
+      if (director) {
     
-      divList2.appendChild(option);        
-  
+        var Dn = (director.value.name);
+        var Di = (director.value.picture);
+        var Dn = (director.value.name);
+        var Dnl = (director.value.name+" "+director.value.lastName1);
+        //Abre la conexion con la base de datos
+        var request4 = indexedDB.open(nameDB);
+
+        request4.onsuccess = function(event) {
+
+          var db = event.target.result;         
+          var objectStore = db.transaction(["directorProduccion"],"readonly").objectStore("directorProduccion");
+
+          var object = objectStore.get(Dn);
+
+          object.onsuccess = function(event) {
+            
+            var prodD = event.target.result;
+            
+            for (var i = 0; i < prodD.productions.length; i++) {
+            
+              if (prodD.productions[i].title !== productionSelected) {
+              
+                var option = document.createElement("option");
+                option.setAttribute("value",Dn);
+                var textop = document.createTextNode(Dnl);
+                option.appendChild(textop);
+              
+                divList2.appendChild(option);   
+
+              }
+            }
+          }
+        }
+        director.continue(); 
       }
-
-      production = productions.next();
     }
-        
-    director = directors.next();
-  
   }
-
+              
   var br2 = document.createElement ("button");
 	br2.setAttribute("class","btn btn-secondary btn-lg mt-2");
 	br2.setAttribute("id","button1");
@@ -1730,33 +1780,60 @@ function showDesasingns() {
   div3.appendChild(formDes3);
   formDes3.appendChild(divList3);
 
-  //PEGAR 3 AQUI
+  //ACTORES
   //Recorro todas las actores del sistema
-  var actors = video.actors;
-  var actor = actors.next();
-  while (actor.done !== true){
+    //PARA MOSTRAR LOS ACTORES ASIGNADOS
+  //Para mostrar los actores
 
-    //Recorro todas las producciones del actor
-    var productions = video.getProductionsActor(actor.value);
-    var production = productions.next();
-    while (production.done !== true){
-          
-      if(production.value.title !== productionSelected){
+  var request3 = indexedDB.open(nameDB);
 
-        var option = document.createElement("option");
-        option.setAttribute("value",actor.value.name);
-        var textop = document.createTextNode(actor.value.name + " " + actor.value.lastName1);
-        option.appendChild(textop);
+  request3.onsuccess = function(event) {
+
+  var db = event.target.result;         
+  var objectStore = db.transaction(["actores"],"readonly").objectStore("actores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
       
-        divList3.appendChild(option); 
-  
-      }
+      var actor = event.target.result;
 
-      production = productions.next();
-    }
-        
-    actor = actors.next();
+      if (actor) {
+    
+        var An = (actor.value.name);
+        var Ai = (actor.value.picture);
+        var An = (actor.value.name);
+        var Anl = (actor.value.name+" "+actor.value.lastName1);
+        //Abre la conexion con la base de datos
+        var request2 = indexedDB.open(nameDB);
+
+        request2.onsuccess = function(event) {
+
+          var db = event.target.result;         
+          var objectStore = db.transaction(["actorProduccion"],"readonly").objectStore("actorProduccion");
+
+          var object = objectStore.get(An);
+
+          object.onsuccess = function(event) {
+            
+            var prodA = event.target.result;
+            
+            for (var i = 0; i < prodA.productions.length; i++) {
   
+              if (prodA.productions[i].title !== productionSelected) {
+
+                var option = document.createElement("option");
+                option.setAttribute("value",An);
+                var textop = document.createTextNode(Anl);
+                option.appendChild(textop);
+              
+                divList3.appendChild(option); 
+          
+              }
+            }
+          }
+        }
+        actor.continue(); 
+      }
+    }
   }
 
   var br3 = document.createElement ("button");

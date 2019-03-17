@@ -9,3 +9,6 @@ de datos
 
 #Version 2.1
 Iteradores de mostrar categorias, producciones, actores y directores cambiados
+
+#Version 2.2
+Toda la funcion de la pagina principal (practica 6) esta implementada desde IndexedDb

@@ -25,9 +25,9 @@ function createTables(){
 		active.createObjectStore("directores", { keyPath: 'name' });
 		active.createObjectStore("usuarios", { keyPath: 'user' });
 
-		active.createObjectStore("categoryPro", { keyPath: 'category' });
-		active.createObjectStore("directorPro", { keyPath: 'name' });
-		active.createObjectStore("actorPro", { keyPath: 'nsme' });
+		active.createObjectStore("categoriaProduccion", { keyPath: 'category' });
+		active.createObjectStore("directorProduccion", { keyPath: 'name' });
+		active.createObjectStore("actorProduccion", { keyPath: 'name' });
 	};
 }
 
@@ -49,6 +49,22 @@ function loadDates(table,array) {
 		
 		}
 		
+	};
+}
+
+//Funcion que nos carga las relaciones iniciales entre objetos desde el init en una tabla
+function loadRelations(table,objets) {
+
+	var request = indexedDB.open(nameDB);
+
+	request.onsuccess = function(event) {
+		
+		var db = event.target.result;         
+		
+		var addObject = db.transaction([table],"readwrite").objectStore(table);
+
+		var addObjectStore = addObject.add(objets);
+
 	};
 }
 
@@ -239,17 +255,38 @@ function initPopulate(){
 		console.log("" + error);
 	}
 
+	//Aqui tambien mantendremos las relaciones en el videoSystem aparte de cargarlos en la base de datos
 	//Asociamos las categorias y las producciones
 	try {
+		var prodCategory1 = {category: category1.name, productions: [movie1.getObject(),serie1.getObject()] };
+		loadRelations("categoriaProduccion",prodCategory1);
 		video.assignCategory(category1,movie1);
 		video.assignCategory(category1,serie1);
+
+		var prodCategory2 = {category: category2.name, productions: [movie2.getObject(),serie3.getObject()] };
+		loadRelations("categoriaProduccion",prodCategory2);
 		video.assignCategory(category2,movie2);
 		video.assignCategory(category2,serie3);
+
+		var prodCategory3 = {category: category3.name, productions: [movie3.getObject()] };
+		loadRelations("categoriaProduccion",prodCategory3);
 		video.assignCategory(category3,movie3);
+
+		var prodCategory4 = {category: category4.name, productions: [movie4.getObject(),serie2.getObject()] };
+		loadRelations("categoriaProduccion",prodCategory4);
 		video.assignCategory(category4,movie4);
 		video.assignCategory(category4,serie2);
+
+		var prodCategory5 = {category: category5.name, productions: [movie5.getObject()] };
+		loadRelations("categoriaProduccion",prodCategory5);
 		video.assignCategory(category5,movie5);
+
+		var prodCategory6 = {category: category6.name, productions: [movie6.getObject()] };
+		loadRelations("categoriaProduccion",prodCategory6);
 		video.assignCategory(category6,movie6);
+
+		var prodCategory7 = {category: category7.name, productions: [movie7.getObject()] };
+		loadRelations("categoriaProduccion",prodCategory7);
 		video.assignCategory(category7,movie7);
 		//video.deassignCategory(category7,movie7);
 	} catch (error) {
@@ -258,9 +295,20 @@ function initPopulate(){
 
 	//Asociamos los actores y las producciones
 	try {
+		var actorProd1 = {name: persona9.name, productions: [serie2.getObject()] };
+		loadRelations("actorProduccion",actorProd1);
 		video.assignActor(persona9,serie2);
+
+		var actorProd2 = {name: persona10.name, productions: [serie2.getObject()] };
+		loadRelations("actorProduccion",actorProd2);
 		video.assignActor(persona10,serie2);
+
+		var actorProd3 = {name: persona11.name, productions: [serie3.getObject()] };
+		loadRelations("actorProduccion",actorProd3);
 		video.assignActor(persona11,serie3);
+
+		var actorProd4 = {name: persona12.name, productions: [serie3.getObject()] };
+		loadRelations("actorProduccion",actorProd4);
 		video.assignActor(persona12,serie3);
 		//video.deassignActor(persona12,serie3);
 	} catch (error) {
@@ -269,13 +317,36 @@ function initPopulate(){
 
 	//Asociamos los directores y las producciones
 	try {
+		var directorProd1 = {name: persona1.name, productions: [movie1.getObject()] };
+		loadRelations("directorProduccion",directorProd1);
 		video.assignDirector(persona1,movie1);
+
+		var directorProd2 = {name: persona2.name, productions: [movie2.getObject()] };
+		loadRelations("directorProduccion",directorProd2);
 		video.assignDirector(persona2,movie2);
+
+		var directorProd3 = {name: persona3.name, productions: [movie3.getObject()] };
+		loadRelations("directorProduccion",directorProd3);
 		video.assignDirector(persona3,movie3);
+
+		var directorProd4 = {name: persona4.name, productions: [movie4.getObject()] };
+		loadRelations("directorProduccion",directorProd4);
 		video.assignDirector(persona4,movie4);
+
+		var directorProd5 = {name: persona5.name, productions: [movie5.getObject()] };
+		loadRelations("directorProduccion",directorProd5);
 		video.assignDirector(persona5,movie5);
+
+		var directorProd6 = {name: persona6.name, productions: [movie6.getObject()] };
+		loadRelations("directorProduccion",directorProd6);
 		video.assignDirector(persona6,movie6);
+
+		var directorProd7 = {name: persona7.name, productions: [movie7.getObject()] };
+		loadRelations("directorProduccion",directorProd7);
 		video.assignDirector(persona7,movie7);
+		
+		var directorProd8 = {name: persona8.name, productions: [serie1.getObject()] };
+		loadRelations("directorProduccion",directorProd8);
 		video.assignDirector(persona8,serie1);
 		//video.deassignDirector(persona8,serie1);
 	} catch (error) {
@@ -1044,6 +1115,8 @@ function ShowDirectors() {
 //Funcion que muestra a un solo actor con su informacion.
 function showActorAlone(){
 
+	var nameActor = this.value;
+	
 	var show = document.getElementById("Nombre");
 	show.innerHTML = "Actores";
 
@@ -1053,21 +1126,25 @@ function showActorAlone(){
 	contentP.removeChild(contentP.firstChild);
 	}
 
-	var search = false;
-	var video = VideoSystem.getInstance();
-	var actors = video.actors;
-	var actor = actors.next();
-	while ((actor.done !== true) && (!search)){
+	var request1 = indexedDB.open(nameDB);
 
-		if (actor.value.name == this.value) {
+	request1.onsuccess = function(event) {
+	
+		var db = event.target.result;         
+		var objectStore = db.transaction(["actores"],"readonly").objectStore("actores");
+		
+		var object = objectStore.get(nameActor);
+	
+		object.onsuccess = function(event) {
+			var actor = object.result;
 			
 			var content = document.createElement("div");
 			content.setAttribute("class", "d-flex")
 			content.setAttribute("class","col-3");
 			var image = document.createElement("img");
 
-			image.setAttribute("src",actor.value.picture);
-			image.setAttribute("alt",actor.value.name);
+			image.setAttribute("src",actor.picture);
+			image.setAttribute("alt",actor.name);
 			image.setAttribute("style","max-heigth:150px;");
 			image.setAttribute("class", "border border-info");
 
@@ -1079,21 +1156,21 @@ function showActorAlone(){
 			var text1 = document.createTextNode("Nombre:");
 			title1.appendChild(text1);
 			var name = document.createElement("p");
-			var textN = document.createTextNode(actor.value.name);
+			var textN = document.createTextNode(actor.name);
 			name.appendChild(textN);
 
 			var title2 = document.createElement("h6");
 			var text2 = document.createTextNode("Apellido:");
 			title2.appendChild(text2);
 			var surname = document.createElement("p");
-			var textS = document.createTextNode(actor.value.lastName1);
+			var textS = document.createTextNode(actor.lastName1);
 			surname.appendChild(textS);
 
 			var title3 = document.createElement("h6");
 			var text3 = document.createTextNode("Fecha de nacimiento:");
 			title3.appendChild(text3);
 			var date = document.createElement("p");
-			var textD = document.createTextNode(actor.value.born.toLocaleDateString());
+			var textD = document.createTextNode(actor.born.toLocaleDateString());
 			date.appendChild(textD);
 
 			var title4 = document.createElement("h6");
@@ -1115,47 +1192,54 @@ function showActorAlone(){
 			prod.setAttribute("class","d-flex");
 			info.appendChild(prod);
 
-			var productions = video.getProductionsActor(actor.value);
-			var production = productions.next();
-			while (production.done !== true){
-				
-				var divI = document.createElement("div");
-				divI.setAttribute("class", "mr-2 text-center");
+			var request2 = indexedDB.open(nameDB);
 
-				var image2 = document.createElement("img");
-				image2.setAttribute("src",production.value.image);
-				image2.setAttribute("alt",production.value.image);
-				image2.setAttribute("style", "height: 80px");
-				image2.setAttribute("class","d-block mb-1");
+			request2.onsuccess = function(event) {
 
-				var b1 = document.createElement ("button");
-				b1.setAttribute("class","btn btn-default btn-sm mb-1");
-				b1.setAttribute("id","buttonP");
-				b1.setAttribute("type","button");
-				b1.setAttribute("value",production.value.title);
-				var textBt = document.createTextNode(production.value.title);
-				b1.appendChild(textBt);
+				var db = event.target.result;         
+				var objectStore = db.transaction(["actorProduccion"],"readonly").objectStore("actorProduccion");
 
-				b1.addEventListener("click",showProductionAlone);
+				var object = objectStore.get(nameActor);
+				object.onsuccess = function(event) {
+					
+					//Crea un array con las producciones de ese director
+					var prodA = event.target.result.productions;
+					for (var i = 0; i < prodA.length; i++) {
 
-				prod.appendChild(divI);
-				divI.appendChild(image2);
-				divI.appendChild(b1);
-				production = productions.next();
-			}
+						var divI = document.createElement("div");
+						divI.setAttribute("class", "mr-2 text-center");
 
-			search = true;
+						var image2 = document.createElement("img");
+						image2.setAttribute("src",prodA[i].image);
+						image2.setAttribute("alt",prodA[i].image);
+						image2.setAttribute("style", "height: 80px");
+						image2.setAttribute("class","d-block mb-1");
 
-		}
+						var b1 = document.createElement ("button");
+						b1.setAttribute("class","btn btn-default btn-sm mb-1");
+						b1.setAttribute("id","buttonP");
+						b1.setAttribute("type","button");
+						b1.setAttribute("value",prodA[i].title);
+						var textBt = document.createTextNode(prodA[i].title);
+						b1.appendChild(textBt);
 
-		actor = actors.next();
-		
+						b1.addEventListener("click",showProductionAlone);
 
-	}
+						prod.appendChild(divI);
+						divI.appendChild(image2);
+						divI.appendChild(b1);
+					}
+				};
+			};
+		};
+	};
+	
 }
 
 //funcion que muestra a un solo director con su informacion
 function showDirectorAlone(){
+
+	var nameDirector = this.value;
 
 	var show = document.getElementById("Nombre");
 	show.innerHTML = "Actores";
@@ -1166,21 +1250,25 @@ function showDirectorAlone(){
 	contentP.removeChild(contentP.firstChild);
 	}
 
-	var search = false;
-	var video = VideoSystem.getInstance();
-	var directors = video.directors;
-	var director = directors.next();
-	while ((director.done !== true) && (!search)){
+	var request1 = indexedDB.open(nameDB);
 
-		if (director.value.name == this.value) {
-			
+	request1.onsuccess = function(event) {
+	
+		var db = event.target.result;         
+		var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
+		
+		var object = objectStore.get(nameDirector);
+	
+		object.onsuccess = function(event) {
+			var director = object.result;
+
 			var content = document.createElement("div");
 			content.setAttribute("class", "d-flex")
 			content.setAttribute("class","col-3");
 			var image = document.createElement("img");
 
-			image.setAttribute("src",director.value.picture);
-			image.setAttribute("alt",director.value.name);
+			image.setAttribute("src",director.picture);
+			image.setAttribute("alt",director.name);
 			image.setAttribute("style","max-heigth:300px;");
 			image.setAttribute("class", "border border-info");
 
@@ -1192,21 +1280,21 @@ function showDirectorAlone(){
 			var text1 = document.createTextNode("Nombre:");
 			title1.appendChild(text1);
 			var name = document.createElement("p");
-			var textN = document.createTextNode(director.value.name);
+			var textN = document.createTextNode(director.name);
 			name.appendChild(textN);
 
 			var title2 = document.createElement("h6");
 			var text2 = document.createTextNode("Apellido:");
 			title2.appendChild(text2);
 			var surname = document.createElement("p");
-			var textS = document.createTextNode(director.value.lastName1);
+			var textS = document.createTextNode(director.lastName1);
 			surname.appendChild(textS);
 
 			var title3 = document.createElement("h6");
 			var text3 = document.createTextNode("Fecha de nacimiento:");
 			title3.appendChild(text3);
 			var date = document.createElement("p");
-			var textD = document.createTextNode(director.value.born.toLocaleDateString());
+			var textD = document.createTextNode(director.born.toLocaleDateString());
 			date.appendChild(textD);
 
 			var title4 = document.createElement("h6");
@@ -1228,47 +1316,56 @@ function showDirectorAlone(){
 			prod.setAttribute("class","d-flex");
 			info.appendChild(prod);
 
-			var productions = video.getProductionsDirector(director.value);
-			var production = productions.next();
-			while (production.done !== true){
+			//Abre la conexion con la base de datos
+			var request2 = indexedDB.open(nameDB);
+
+			request2.onsuccess = function(event) {
+
+				var db = event.target.result;         
+				var objectStore = db.transaction(["directorProduccion"],"readonly").objectStore("directorProduccion");
+
+				var object = objectStore.get(nameDirector);
+				object.onsuccess = function(event) {
+					
+					//Crea un array con las producciones de ese director
+					var prodD = event.target.result.productions;
+					for (var i = 0; i < prodD.length; i++) {
 				
-				var divI = document.createElement("div");
-				divI.setAttribute("class", "mr-2 text-center");
+						var divI = document.createElement("div");
+						divI.setAttribute("class", "mr-2 text-center");
 
-				var image2 = document.createElement("img");
-				image2.setAttribute("src",production.value.image);
-				image2.setAttribute("alt",production.value.image);
-				image2.setAttribute("style", "height: 80px");
-				image2.setAttribute("class","d-block mb-1");
+						var image2 = document.createElement("img");
+						image2.setAttribute("src",prodD[i].image);
+						image2.setAttribute("alt",prodD[i].image);
+						image2.setAttribute("style", "height: 80px");
+						image2.setAttribute("class","d-block mb-1");
 
-				var b1 = document.createElement ("button");
-				b1.setAttribute("class","btn btn-default btn-sm mb-1");
-				b1.setAttribute("id","buttonP");
-				b1.setAttribute("type","button");
-				b1.setAttribute("value",production.value.tile);
-				var textBt = document.createTextNode(production.value.title);
-				b1.appendChild(textBt);
+						var b1 = document.createElement ("button");
+						b1.setAttribute("class","btn btn-default btn-sm mb-1");
+						b1.setAttribute("id","buttonP");
+						b1.setAttribute("type","button");
+						b1.setAttribute("value",prodD[i].tile);
+						var textBt = document.createTextNode(prodD[i].title);
+						b1.appendChild(textBt);
 
-				b1.addEventListener("click",showProductionAlone);
+						b1.addEventListener("click",showProductionAlone);
 
-				prod.appendChild(divI);
-				divI.appendChild(image2);
-				divI.appendChild(b1);
-				production = productions.next();
-			}
-
-			search = true;
-
-		}
-
-		director = directors.next();
-
-	}
+						prod.appendChild(divI);
+						divI.appendChild(image2);
+						divI.appendChild(b1);
+					}
+				};
+			};
+		};
+	};			
+	
 }
 
 //funcion que muestra los datos de una produccion.
 function showProductionAlone(){
 
+	var titleProduction = this.value;
+	
 	var show = document.getElementById("Nombre");
 	show.innerHTML = "Produccion";
 
@@ -1278,21 +1375,25 @@ function showProductionAlone(){
 	contentP.removeChild(contentP.firstChild);
 	}
 
-	var search = false;
-	var video = VideoSystem.getInstance();
-	var productions = video.productions;
-	var production = productions.next();
-	while ((production.done !== true) && (!search)){
+	var request1 = indexedDB.open(nameDB);
 
-		if (production.value.title == this.value) {
+	request1.onsuccess = function(event) {
+	
+		var db = event.target.result;         
+		var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+		
+		var object = objectStore.get(titleProduction);
+	
+		object.onsuccess = function(event) {
+			var production = object.result;
 			
 			var content = document.createElement("div");
 			content.setAttribute("class", "d-flex");
 			content.setAttribute("class","col-3");
 			var image = document.createElement("img");
 
-			image.setAttribute("src",production.value.image);
-			image.setAttribute("alt",production.value.title);
+			image.setAttribute("src",production.image);
+			image.setAttribute("alt",production.title);
 			image.setAttribute("style","max-heigth:300px;");
 			image.setAttribute("class", "border border-info");
 
@@ -1305,14 +1406,14 @@ function showProductionAlone(){
 			title1.appendChild(text1);
 			var name = document.createElement("p");
 			name.setAttribute("id","prodN");
-			var textN = document.createTextNode(production.value.title);
+			var textN = document.createTextNode(production.title);
 			name.appendChild(textN);
 
 			var title2 = document.createElement("h6");
 			var text2 = document.createTextNode("Nacionalidad:");
 			title2.appendChild(text2);
 			var nationality = document.createElement("p");
-			var textNa = document.createTextNode(production.value.nationality);
+			var textNa = document.createTextNode(production.nationality);
 			nationality.appendChild(textNa);
 
 			
@@ -1321,7 +1422,7 @@ function showProductionAlone(){
 			var text3 = document.createTextNode("Publicacion:");
 			title3.appendChild(text3);
 			var publication = document.createElement("p");
-			var textP = document.createTextNode(production.value.publication.toLocaleDateString());
+			var textP = document.createTextNode(production.publication.toLocaleDateString());
 			publication.appendChild(textP);
 
 			var title4 = document.createElement("h6");
@@ -1329,7 +1430,7 @@ function showProductionAlone(){
 			var text4 = document.createTextNode("Sinopsis:");
 			title4.appendChild(text4);
 			var synopsis = document.createElement("p");
-			var textS = document.createTextNode(production.value.synopsis);
+			var textS = document.createTextNode(production.synopsis);
 			synopsis.appendChild(textS);
 
 			contentP.appendChild(content);
@@ -1355,7 +1456,7 @@ function showProductionAlone(){
 				br.setAttribute("class","btn btn-default btn-sm mb-1");
 				br.setAttribute("id","buttonP");
 				br.setAttribute("type","button");
-				br.setAttribute("value",production.value.title);
+				br.setAttribute("value",production.title);
 				var textBr = document.createTextNode("Ver");
 				br.appendChild(textBr);
 
@@ -1375,7 +1476,7 @@ function showProductionAlone(){
 				br.setAttribute("class","btn btn-default btn-sm mb-1");
 				br.setAttribute("id","buttonP");
 				br.setAttribute("type","button");
-				br.setAttribute("value",production.value.title);
+				br.setAttribute("value",production.title);
 				var textBr = document.createTextNode("Ver");
 				br.appendChild(textBr);
 
@@ -1397,45 +1498,73 @@ function showProductionAlone(){
 			prod.setAttribute("class","d-flex");
 			info.appendChild(prod);
 
-			var directors = video.directors;
-			var director = directors.next();
-			while (director.done !== true){
+			//Para mostrar los directores
+			var request2 = indexedDB.open(nameDB);
 
-				var productions = video.getProductionsDirector(director.value);
-				var production = productions.next();
-				while (production.done !== true){
+			request2.onsuccess = function(event) {
+		
+			var db = event.target.result;         
+			var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
+				//Abre un cursor y reccorre los datos devueltos 
+				objectStore.openCursor().onsuccess = function(event) {
 					
-					if(production.value.title == this.value){
-
-						var divI = document.createElement("div");
-						divI.setAttribute("class", "mr-2 text-center");
-
-						var image2 = document.createElement("img");
-						image2.setAttribute("src",director.value.picture);
-						image2.setAttribute("alt",director.value.name);
-						image2.setAttribute("style", "height: 80px");
-						image2.setAttribute("class","d-block mb-1");
-
-						var b1 = document.createElement ("button");
-						b1.setAttribute("class","btn btn-default btn-sm mb-1");
-						b1.setAttribute("id","buttonP");
-						b1.setAttribute("type","button");
-						b1.setAttribute("value",director.value.name);
-						var textBt = document.createTextNode(director.value.name+" "+director.value.lastName1);
-						b1.appendChild(textBt);
-
-						b1.addEventListener("click",showDirectorAlone);
-
-						prod.appendChild(divI);
-						divI.appendChild(image2);
-						divI.appendChild(b1);
-	
-					}
-
-					production = productions.next();
-				}
+					var director = event.target.result;
+		
+					if (director) {
 				
-				director = directors.next();
+						var Dn = (director.value.name);
+						var Di = (director.value.picture);
+						var Dn = (director.value.name);
+						var Dnl = (director.value.name+" "+director.value.lastName1);
+						//Abre la conexion con la base de datos
+						var request2 = indexedDB.open(nameDB);
+
+						request2.onsuccess = function(event) {
+
+							var db = event.target.result;         
+							var objectStore = db.transaction(["directorProduccion"],"readonly").objectStore("directorProduccion");
+
+							var object = objectStore.get(Dn);
+
+							object.onsuccess = function(event) {
+								
+								var prodD = event.target.result;
+								
+								for (var i = 0; i < prodD.productions.length; i++) {
+								
+									if (prodD.productions[i].title == titleProduction) {
+									
+									var divI = document.createElement("div");
+									divI.setAttribute("class", "mr-2 text-center");
+
+									var image2 = document.createElement("img");
+									image2.setAttribute("src",Di);
+									image2.setAttribute("alt",Dnl);
+									image2.setAttribute("style", "height: 80px");
+									image2.setAttribute("class","d-block mb-1");
+
+									var b1 = document.createElement ("button");
+									b1.setAttribute("class","btn btn-default btn-sm mb-1");
+									b1.setAttribute("id","buttonP");
+									b1.setAttribute("type","button");
+									b1.setAttribute("value",Dn);
+									var textBt = document.createTextNode(Dnl);
+									b1.appendChild(textBt);
+
+									b1.addEventListener("click",showDirectorAlone);
+
+									prod.appendChild(divI);
+									divI.appendChild(image2);
+									divI.appendChild(b1);
+
+									}
+								}
+							}
+								
+						}
+						director.continue();
+					}
+				}
 			}
 
 			var title6 = document.createElement("h6");
@@ -1449,56 +1578,77 @@ function showProductionAlone(){
 			prod2.setAttribute("class","d-flex");
 			info.appendChild(prod2);
 
-			var actors = video.actors;
-			var actor = actors.next();
+			//Para mostrar los actores
 			
-			while (actor.done !== true) {
-				
-				var productions = video.getProductionsActor(actor.value);
-				var production = productions.next();
-				while (production.done !== true) {
+			var request3 = indexedDB.open(nameDB);
+
+			request3.onsuccess = function(event) {
+		
+			var db = event.target.result;         
+			var objectStore = db.transaction(["actores"],"readonly").objectStore("actores");
+				//Abre un cursor y reccorre los datos devueltos 
+				objectStore.openCursor().onsuccess = function(event) {
 					
-					if(production.value.title == this.value){
-
-						var divI = document.createElement("div");
-						divI.setAttribute("class", "mr-2 text-center");
-
-						var image2 = document.createElement("img");
-						image2.setAttribute("src",actor.value.picture);
-						image2.setAttribute("alt",actor.value.name);
-						image2.setAttribute("style", "height: 80px");
-						image2.setAttribute("class","d-block mb-1");
-
-						var b1 = document.createElement ("button");
-						b1.setAttribute("class","btn btn-default btn-sm mb-1");
-						b1.setAttribute("id","buttonP");
-						b1.setAttribute("type","button");
-						b1.setAttribute("value",actor.value.name);
-						var textBt = document.createTextNode(actor.value.name+" "+actor.value.lastName1);
-						b1.appendChild(textBt);
-
-						b1.addEventListener("click",showActorAlone);
-
-						prod2.appendChild(divI);
-						divI.appendChild(image2);
-						divI.appendChild(b1);
-	
-					}
-
-					production = productions.next();
-				}
+					var actor = event.target.result;
+		
+					if (actor) {
 				
-				actor = actors.next();
-			}
+						var An = (actor.value.name);
+						var Ai = (actor.value.picture);
+						var An = (actor.value.name);
+						var Anl = (actor.value.name+" "+actor.value.lastName1);
+						//Abre la conexion con la base de datos
+						var request2 = indexedDB.open(nameDB);
 
-			search = true;
+						request2.onsuccess = function(event) {
 
+							var db = event.target.result;         
+							var objectStore = db.transaction(["actorProduccion"],"readonly").objectStore("actorProduccion");
+
+							var object = objectStore.get(An);
+
+							object.onsuccess = function(event) {
+								
+								var prodA = event.target.result;
+								
+								for (var i = 0; i < prodA.productions.length; i++) {
+									
+									if (prodA.productions[i].title == titleProduction) {
+
+									var divI = document.createElement("div");
+									divI.setAttribute("class", "mr-2 text-center");
+
+									var image2 = document.createElement("img");
+									image2.setAttribute("src",Ai);
+									image2.setAttribute("alt",An);
+									image2.setAttribute("style", "height: 80px");
+									image2.setAttribute("class","d-block mb-1");
+
+									var b1 = document.createElement ("button");
+									b1.setAttribute("class","btn btn-default btn-sm mb-1");
+									b1.setAttribute("id","buttonP");
+									b1.setAttribute("type","button");
+									b1.setAttribute("value",An);
+									var textBt = document.createTextNode(Anl);
+									b1.appendChild(textBt);
+
+									b1.addEventListener("click",showActorAlone);
+
+									prod2.appendChild(divI);
+									divI.appendChild(image2);
+									divI.appendChild(b1);
+
+									}
+								}
+							}
+								
+						}
+						actor.continue();
+					}
+				}
+			}				
 		}
-
-		production = productions.next();
-
 	}
-	
 }
 
 var arrayWindows = new Array();

@@ -227,20 +227,29 @@ function formCategory() {
 	inp0F2.setAttribute("class","form-control");
   inp0F2.setAttribute("placeholder","");
   
-  var video = VideoSystem.getInstance();
-	var categories = video.categories;
-	var category = categories.next();
-	while (category.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",category.value.name);
-    var textop = document.createTextNode(category.value.name);
-    option.appendChild(textop);
-    
-    inp0F2.appendChild(option);
+  request.onsuccess = function(event) {
 
-    category = categories.next();
-  }
+	  var db = event.target.result;         
+		var objectStore = db.transaction(["categorias"],"readonly").objectStore("categorias");
+		//Abre un cursor y reccorre los datos devueltos 
+		objectStore.openCursor().onsuccess = function(event) {
+			
+			var category = event.target.result;
+
+			if (category) {
+
+        var option = document.createElement("option");
+        option.setAttribute("value",category.value.name);
+        var textop = document.createTextNode(category.value.name);
+        option.appendChild(textop);
+        
+        inp0F2.appendChild(option);
+        category.continue();
+			}
+		}
+	} 
 
 	var div1F2 = document.createElement("div");
 	div1F2.setAttribute("class","form-group");
@@ -328,20 +337,29 @@ function formCategory() {
 	inp0F3.setAttribute("class","form-control");
   inp0F3.setAttribute("placeholder","");
   
-  var video = VideoSystem.getInstance();
-	var categories = video.categories;
-	var category = categories.next();
-	while (category.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",category.value.name);
-    var textop = document.createTextNode(category.value.name);
-    option.appendChild(textop);
-    
-    inp0F3.appendChild(option);
+  request.onsuccess = function(event) {
 
-    category = categories.next();
-  }
+	  var db = event.target.result;         
+		var objectStore = db.transaction(["categorias"],"readonly").objectStore("categorias");
+		//Abre un cursor y reccorre los datos devueltos 
+		objectStore.openCursor().onsuccess = function(event) {
+			
+			var category = event.target.result;
+
+			if (category) {
+
+        var option = document.createElement("option");
+        option.setAttribute("value",category.value.name);
+        var textop = document.createTextNode(category.value.name);
+        option.appendChild(textop);
+        
+        inp0F3.appendChild(option);
+        category.continue();
+			}
+		}
+	} 
 
   var brDse = document.createElement ("button");
 	brDse.setAttribute("class","btn btn-secondary btn-lg mb-3");
@@ -385,6 +403,19 @@ function insertCategory() {
     var categoryNew = new Category(categoryIn , descriptionIn);
     video.addCategory(categoryNew);
 
+    //Ademas lo insertaremos en la base de datos
+    var request = indexedDB.open(nameDB);
+	
+    request.onsuccess = function(event) {
+
+      var db = event.target.result;         
+      
+      var addObject = db.transaction(["categorias"],"readwrite").objectStore("categorias");
+        
+      var addObjectStore = addObject.add(categoryNew.getObject());
+      
+    }
+    
     var contentP = document.getElementById("principal");
     
     var advise = document.createElement("h5");
@@ -392,8 +423,9 @@ function insertCategory() {
     advise.setAttribute("style","width:100%");
     var textAd = document.createTextNode("Categoria " + categoryIn + " Introducida");
     advise.appendChild(textAd);
-    
+      
     contentP.appendChild(advise);
+
   }
 
 }
@@ -420,36 +452,46 @@ function modifyCategory() {
   
   if ((categoryIn !== "") && (descriptionIn !== "")) {
     
-    var video = VideoSystem.getInstance();
-    var categories = video.categories;
-    var category = categories.next();
-    while (category.done !== true){
+    var request = indexedDB.open(nameDB);
 
-      if (category.value.name == categoryModify){
+    request.onsuccess = function(event) {
+
+	    var db = event.target.result;         
+		  var objectStore = db.transaction(["categorias"],"readwrite").objectStore("categorias");
+
+		  objectStore.openCursor().onsuccess = function(event) {
+			
+			  var category = event.target.result;
+
+			  if (category) {
+
+          if (category.value.name == categoryModify){
+
+            var updateData = category.value;
+            
+            updateData.name = categoryIn;
+            updateData.description = descriptionIn;
+
+            objectStore.put(updateData);
+
+            if (categoryIn != category.name) {
+              objectStore.delete(category.value.name);
+            }
+
+            var contentP = document.getElementById("principal");
         
-        if (categoryIn != "") {
-          category.value.name = categoryIn;
-        }
-
-        if (descriptionIn != "") {
-          category.value.description = descriptionIn;
-        }
-
-        var contentP = document.getElementById("principal");
-    
-        var advise = document.createElement("h5");
-        advise.setAttribute("class","text-center text-primary");
-        advise.setAttribute("style","width:100%");
-        var textAd = document.createTextNode("Categoria " + categoryModify + " Modificada");
-        advise.appendChild(textAd);
-        
-        contentP.appendChild(advise);
-      
-      }
-      category = categories.next();
-    
-    }
-
+            var advise = document.createElement("h5");
+            advise.setAttribute("class","text-center text-primary");
+            advise.setAttribute("style","width:100%");
+            var textAd = document.createTextNode("Categoria " + categoryModify + " Modificada");
+            advise.appendChild(textAd);
+            
+            contentP.appendChild(advise);
+          }
+          category.continue();
+			  }
+		  }
+  	} 
   }
 
 }
@@ -458,30 +500,41 @@ function modifyCategory() {
 function deleteCategory() {
   var categoryDelete = document.forms["delCategory"]["selectNameD"].value;
 
-  var video = VideoSystem.getInstance();
-  var categories = video.categories;
-  var category = categories.next();
-  while (category.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    if (category.value.name == categoryDelete){
-        
-      video.removeCategory(category.value);
+  request.onsuccess = function(event) {
+
+    var db = event.target.result;         
+    var objectStore = db.transaction(["categorias"],"readwrite").objectStore("categorias");
+
+    objectStore.openCursor().onsuccess = function(event) {
+    
+      var category = event.target.result;
+
+      if (category) {
+
+        if (categoryDelete == category.value.name) {
+
+          objectStore.delete(category.value.name);
+
+          var contentP = document.getElementById("principal");
+    
+          var advise = document.createElement("h5");
+          advise.setAttribute("class","text-center text-primary");
+          advise.setAttribute("style","width:100%");
+          var textAd = document.createTextNode("Categoria " + categoryDelete + " Borrada del sistema");
+          advise.appendChild(textAd);
+
+          contentP.appendChild(advise);
+        }
+
+        category.continue();
+      }
       
     }
-      
-    category = categories.next();
-    
   }
 
-  var contentP = document.getElementById("principal");
-    
-  var advise = document.createElement("h5");
-  advise.setAttribute("class","text-center text-primary");
-  advise.setAttribute("style","width:100%");
-  var textAd = document.createTextNode("Categoria " + categoryDelete + " Borrada del sistema");
-  advise.appendChild(textAd);
-    
-  contentP.appendChild(advise);
+
 
 }
 
@@ -752,20 +805,30 @@ function formProduction() {
 	inp0F2.setAttribute("class","form-control");
   inp0F2.setAttribute("placeholder","");
   
-  var video = VideoSystem.getInstance();
-	var productions = video.productions;
-	var production = productions.next();
-	while (production.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",production.value.title);
-    var textop = document.createTextNode(production.value.title);
-    option.appendChild(textop);
-    
-    inp0F2.appendChild(option);
+  request.onsuccess = function(event) {
 
-    var production = productions.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+      //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+          
+      var production = event.target.result;
+
+        if (production) {
+
+          var option = document.createElement("option");
+          option.setAttribute("value",production.value.title);
+          var textop = document.createTextNode(production.value.title);
+          option.appendChild(textop);
+            
+          inp0F2.appendChild(option);
+          production.continue();
+        }
+      }
   }
+
 
   var div1F2 = document.createElement("div");
 	div1F2.setAttribute("class","form-group");
@@ -952,20 +1015,30 @@ function formProduction() {
 	inp0F3.setAttribute("class","form-control");
   inp0F3.setAttribute("placeholder","");
   
-  var video = VideoSystem.getInstance();
-	var productions = video.productions;
-	var production = productions.next();
-	while (production.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",production.value.title);
-    var textop = document.createTextNode(production.value.title);
-    option.appendChild(textop);
-    
-    inp0F3.appendChild(option);
+  request.onsuccess = function(event) {
 
-    var production = productions.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+      //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+          
+      var production = event.target.result;
+
+        if (production) {
+
+          var option = document.createElement("option");
+          option.setAttribute("value",production.value.title);
+          var textop = document.createTextNode(production.value.title);
+          option.appendChild(textop);
+          
+          inp0F3.appendChild(option);
+          production.continue();
+        }
+      }
   }
+  
 
   var brDse = document.createElement ("button");
 	brDse.setAttribute("class","btn btn-secondary btn-lg mb-3");
@@ -1030,21 +1103,30 @@ function assignsProductions(){
 	inp0F4.setAttribute("class","form-control");
   inp0F4.setAttribute("placeholder","");
   
-  var video = VideoSystem.getInstance();
-	var productions = video.productions;
-	var production = productions.next();
-	while (production.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",production.value.title);
-    var textop = document.createTextNode(production.value.title);
-    option.appendChild(textop);
-    
-    inp0F4.appendChild(option);
+  request.onsuccess = function(event) {
 
-    var production = productions.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+      //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+          
+      var production = event.target.result;
+
+        if (production) {
+
+          var option = document.createElement("option");
+          option.setAttribute("value",production.value.title);
+          var textop = document.createTextNode(production.value.title);
+          option.appendChild(textop);
+          
+          inp0F4.appendChild(option);
+          production.continue();
+        }
+      }
   }
-
+  
   var brAse = document.createElement ("button");
 	brAse.setAttribute("class","btn btn-secondary btn-lg mb-3");
 	brAse.setAttribute("id","buttonAse");
@@ -1075,19 +1157,29 @@ function assignsProductions(){
 //Funcion que muestra lo que tiene asignado una produccion para desasignarlo
 function showAssigns() {
   var productionSelected = document.forms["asgProduction"]["selectTitleS"].value;
-
+  var objectpro = "";
   //Recorro todas las producciones para seleccionarla y mandarla en los input
-  var video = VideoSystem.getInstance();
-  var productions = video.productions;
-	var production = productions.next();
-	while (production.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    if (production.value.title == productionSelected) {
+  request.onsuccess = function(event) {
 
-      var objectpro = production.value;
-        
-    }
-      production = productions.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["producciones"],"readonly").objectStore("producciones");
+      //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+          
+      var production = event.target.result;
+
+        if (production) {
+
+          if (production.value.title == productionSelected) {
+      
+            objectpro = production.value;
+       
+          }
+          production.continue();
+        }
+      }
   }
 
   var contentP = document.getElementById("principal");
@@ -1121,31 +1213,56 @@ function showAssigns() {
   div1.appendChild(formAsigns1);
   formAsigns1.appendChild(divList1);
   
-  //Recorro todas las categorias del sistema
-	var categories = video.categories;
-	var category = categories.next();
-	while (category.done !== true){
+  //CATEGORIAS
+  var request = indexedDB.open(nameDB);
 
-		//Obtengo las producciones de esa categoria
-		var productions = video.getProductionsCategory(category.value);
-		var production = productions.next();
-		while (production.done !== true){
+  request.onsuccess = function(event) {
 
-      if (production.value.title == productionSelected) {
+      var db = event.target.result;         
+      var objectStore = db.transaction(["categorias"],"readonly").objectStore("categorias");
+        //Abre un cursor y reccorre los datos devueltos 
+      objectStore.openCursor().onsuccess = function(event) {
+            
+        var category = event.target.result;
 
-        var option = document.createElement("option");
-        option.setAttribute("value",category.value.name);
-        var textop = document.createTextNode(category.value.name);
-        option.appendChild(textop);
-    
-        divList1.appendChild(option);
-        
+        if (category) {
+
+          var Cn = (category.value.name);
+          //Abre la conexion con la base de datos
+          var request2 = indexedDB.open(nameDB);
+
+          request2.onsuccess = function(event) {
+
+            var db = event.target.result;         
+            var objectStore = db.transaction(["categoriaProduccion"],"readonly").objectStore("categoriaProduccion");
+
+            var object = objectStore.get(Cn);
+
+            object.onsuccess = function(event) {
+                  
+              var prodD = event.target.result;
+                  
+              for (var i = 0; i < prodD.productions.length; i++) {
+                  
+                if (prodD.productions[i].title == productionSelected) {
+                    
+                  var option = document.createElement("option");
+                  option.setAttribute("value",Cn);
+                  var textop = document.createTextNode(Cn);
+                  option.appendChild(textop);
+                  
+                  divList1.appendChild(option);
+
+                }
+              }
+            }
+          }
+          category.continue();
+        }
       }
-      production = productions.next();
     }
-    category = categories.next();
 
-  }
+
 
   var br1 = document.createElement ("button");
 	br1.setAttribute("class","btn btn-secondary btn-lg mt-2");
@@ -1182,32 +1299,59 @@ function showAssigns() {
   div2.appendChild(formAsigns2);
   formAsigns2.appendChild(divList2);
 
-  //Recorro todas las directores del sistema
-  var directors = video.directors;
-	var director = directors.next();
-	while (director.done !== true){
+  //DIRECTORES
+  //PARA MOSTRAR LOS DIRECTORES ASIGNADOS
+  //Para mostrar los directores
+  var request2 = indexedDB.open(nameDB);
 
-    //Recorro todas las producciones del director
-    var productions = video.getProductionsDirector(director.value);
-		var production = productions.next();
-		while (production.done !== true){
-					
-			if(production.value.title == productionSelected){
+  request2.onsuccess = function(event) {
 
-        var option = document.createElement("option");
-        option.setAttribute("value",director.value.name);
-        var textop = document.createTextNode(director.value.name + " " + director.value.lastName1);
-        option.appendChild(textop);
+  var db = event.target.result;         
+  var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+      
+      var director = event.target.result;
+
+      if (director) {
     
-        divList2.appendChild(option);
-	
-			}
+        var Dn = (director.value.name);
+        var Di = (director.value.picture);
+        var Dn = (director.value.name);
+        var Dnl = (director.value.name+" "+director.value.lastName1);
+        //Abre la conexion con la base de datos
+        var request2 = indexedDB.open(nameDB);
 
-			production = productions.next();
-		}
-				
-		director = directors.next();
-  
+        request2.onsuccess = function(event) {
+
+          var db = event.target.result;         
+          var objectStore = db.transaction(["directorProduccion"],"readonly").objectStore("directorProduccion");
+
+          var object = objectStore.get(Dn);
+
+          object.onsuccess = function(event) {
+            
+            var prodD = event.target.result;
+            
+            for (var i = 0; i < prodD.productions.length; i++) {
+            
+              if (prodD.productions[i].title == productionSelected) {
+              
+                var option = document.createElement("option");
+                option.setAttribute("value",Dn);
+                var textop = document.createTextNode(Dn);
+                option.appendChild(textop);
+            
+                divList2.appendChild(option);
+
+              }
+            }
+          }
+            
+        }
+        director.continue();
+      }
+    }
   }
 
   var br2 = document.createElement ("button");
@@ -1245,32 +1389,60 @@ function showAssigns() {
   div3.appendChild(formAsigns3);
   formAsigns3.appendChild(divList3);
 
-  //Recorro todas las actores del sistema
-  var actors = video.actors;
-	var actor = actors.next();
-	while (actor.done !== true){
+  //Actores
+  //PARA MOSTRAR LOS ACTORES ASIGNADOS
+  //Para mostrar los actores
+      
+  var request3 = indexedDB.open(nameDB);
 
-    //Recorro todas las producciones dek director
-    var productions = video.getProductionsActor(actor.value);
-		var production = productions.next();
-		while (production.done !== true){
-					
-			if(production.value.title == productionSelected){
+  request3.onsuccess = function(event) {
 
-        var option = document.createElement("option");
-        option.setAttribute("value",actor.value.name);
-        var textop = document.createTextNode(actor.value.name + " " + actor.value.lastName1);
-        option.appendChild(textop);
+  var db = event.target.result;         
+  var objectStore = db.transaction(["actores"],"readonly").objectStore("actores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+      
+      var actor = event.target.result;
+
+      if (actor) {
     
-        divList3.appendChild(option);
-	
-			}
+        var An = (actor.value.name);
+        var Ai = (actor.value.picture);
+        var An = (actor.value.name);
+        var Anl = (actor.value.name+" "+actor.value.lastName1);
+        //Abre la conexion con la base de datos
+        var request2 = indexedDB.open(nameDB);
 
-			production = productions.next();
-		}
-				
-		actor = actors.next();
+        request2.onsuccess = function(event) {
+
+          var db = event.target.result;         
+          var objectStore = db.transaction(["actorProduccion"],"readonly").objectStore("actorProduccion");
+
+          var object = objectStore.get(An);
+
+          object.onsuccess = function(event) {
+            
+            var prodA = event.target.result;
+            
+            for (var i = 0; i < prodA.productions.length; i++) {
   
+              if (prodA.productions[i].title == productionSelected) {
+
+                var option = document.createElement("option");
+                option.setAttribute("value",An);
+                var textop = document.createTextNode(Anl);
+                option.appendChild(textop);
+            
+                divList3.appendChild(option);
+          
+              }
+            }
+          }
+        }
+          
+      }
+      actor.continue();
+    }
   }
 
   var br3 = document.createElement ("button");

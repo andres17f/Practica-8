@@ -12,3 +12,7 @@ Iteradores de mostrar categorias, producciones, actores y directores cambiados
 
 #Version 2.2
 Toda la funcion de la pagina principal (practica 6) esta implementada desde IndexedDb
+
+#Version 2.3
+El formulario categorias terminado *Posibles mejoras en modificar*
+EL formulario producciones cambiado y muestra lo que tiene asignado

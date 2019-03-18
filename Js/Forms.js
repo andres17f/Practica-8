@@ -467,16 +467,16 @@ function modifyCategory() {
 
           if (category.value.name == categoryModify){
 
+            if (categoryIn != category.name) {
+              objectStore.delete(category.value.name);
+            }
+
             var updateData = category.value;
             
             updateData.name = categoryIn;
             updateData.description = descriptionIn;
 
             objectStore.put(updateData);
-
-            if (categoryIn != category.name) {
-              objectStore.delete(category.value.name);
-            }
 
             var contentP = document.getElementById("principal");
         
@@ -491,7 +491,7 @@ function modifyCategory() {
           category.continue();
 			  }
 		  }
-  	} 
+  	}
   }
 
 }
@@ -533,8 +533,6 @@ function deleteCategory() {
       
     }
   }
-
-
 
 }
 
@@ -2027,6 +2025,19 @@ function insertProduction() {
         var serieNew = new Serie(titleIn, date, nationalityIn, synopsisIn, imageIn, seasonsIn);
         video.addProduction(serieNew);
 
+        //Ademas lo insertaremos en la base de datos
+        var request = indexedDB.open(nameDB);
+      
+        request.onsuccess = function(event) {
+
+          var db = event.target.result;         
+          
+          var addObject = db.transaction(["producciones"],"readwrite").objectStore("producciones");
+            
+          var addObjectStore = addObject.add(serieNew.getObject());
+          
+        }
+
         var contentP = document.getElementById("principal");
 
         var advise = document.createElement("h5");
@@ -2055,6 +2066,19 @@ function insertProduction() {
 
         var movieNew = new Movie(titleIn, date, nationalityIn, synopsisIn, imageIn, resourceIn, locationsIn);
         video.addProduction(movieNew);
+
+        //Ademas lo insertaremos en la base de datos
+        var request = indexedDB.open(nameDB);
+      
+        request.onsuccess = function(event) {
+
+          var db = event.target.result;         
+          
+          var addObject = db.transaction(["producciones"],"readwrite").objectStore("producciones");
+            
+          var addObjectStore = addObject.add(movieNew.getObject());
+          
+        }
 
         var contentP = document.getElementById("principal");
 
@@ -2110,121 +2134,53 @@ function modifyProduction() {
   } 
   
   if ((titleIn !== "") && (publicationIn !== "")) {
-    
-    var video = VideoSystem.getInstance();
-    var productions = video.productions;
-    var production = productions.next();
-    while ((production.done !== true) && (!search)) {
 
-      if ((production.value.title === productionModify) && (production.value instanceof Serie)) {
+    var request = indexedDB.open(nameDB);
 
-        if ((resourceIn == "") && (locationsIn == "")) {
+    request.onsuccess = function(event) {
 
-          if (titleIn != "") {
-            production.value.title = titleIn;
-          }
-  
-          if (publicationIn != "") {
-            production.value.publication = date;
-          }
+	    var db = event.target.result;         
+		  var objectStore = db.transaction(["producciones"],"readwrite").objectStore("producciones");
 
-          if (nationalityIn != "") {
-            production.value.nationality = nationalityIn;
-          }
-  
-          if (synopsisIn != "") {
-            production.value.synopsis = synopsis2In;
-          }
-  
-          if (imageIn != "") {
-            production.value.image = imageIn;
-          }
-  
-          if (seasonIn != "") {
-            production.value.season = seasonIn;
-          }
-  
-          var contentP = document.getElementById("principal");
-  
-          var advise = document.createElement("h5");
-          advise.setAttribute("class","text-center text-primary");
-          advise.setAttribute("style","width:100%");
-          var textAd = document.createTextNode("Serie " + productionModify + " modificada");
-          advise.appendChild(textAd);
-          
-          contentP.appendChild(advise);
-          
-        } else  {
+		  objectStore.openCursor().onsuccess = function(event) {
+			
+			  var production = event.target.result;
 
-          var inputResource = document.getElementById("inputResourceM");
-          inputResource.setAttribute("class","border border-danger form-control");
-          inputResource.setAttribute("placeholder","El campo no se puede introducir en una serie");
+			  if (production) {
+
+          if (production.value.title == productionModify){
+
+            if (titleIn != production.title) {
+              objectStore.delete(production.value.title);
+              console.log("borra " + production.value.title);
+            }
+              
+            var updateData = production.value;
+              
+            updateData.title = titleIn;
+            updateData.nationality = nationalityIn;
+            updateData.publication = date;
+            updateData.synopsis = synopsisIn;
+            updateData.image = imageIn;
+              //updateData.resource = resourceIn;
+              //updateData.locations = locationsIn;
+              //updateData.season = seasonsIn;
+
+            objectStore.put(updateData);
+
+            var contentP = document.getElementById("principal");
   
-          var inputLocations = document.getElementById("inputLocationM");
-          inputLocations.setAttribute("class","border border-danger form-control");
-          inputLocations.setAttribute("placeholder","El campo no se puede introducir en una serie");
-          
-        }
-
-        search = true;
-        
-      }
-
-      if ((production.value.title === productionModify) && (production.value instanceof Movie)) {
-
-        if (seasonsIn == "") {
-   
-          if (titleIn != "") {
-            production.value.title = titleIn;
+            var advise = document.createElement("h5");
+            advise.setAttribute("class","text-center text-primary");
+            advise.setAttribute("style","width:100%");
+            var textAd = document.createTextNode("Produccion " + productionModify + " modificada");
+            advise.appendChild(textAd);
+              
+            contentP.appendChild(advise);
           }
-  
-          if (publicationIn != "") {
-            production.value.publication = date;
-          }
-
-          if (nationalityIn != "") {
-            production.value.nationality = nationalityIn;
-          }
-  
-          if (synopsisIn != "") {
-            production.value.synopsis = synopsisIn;
-          }
-  
-          if (imageIn != "") {
-            production.value.image = imageIn;
-          }
-  
-          if (resourceIn != "") {
-            production.value.resource = resourceIn;
-          }
-
-          if (locationsIn != "") {
-            production.value.location = locationsIn;
-          }
-  
-          var contentP = document.getElementById("principal");
-  
-          var advise = document.createElement("h5");
-          advise.setAttribute("class","text-center text-primary");
-          advise.setAttribute("style","width:100%");
-          var textAd = document.createTextNode("Pelicula " + productionModify + " modificada");
-          advise.appendChild(textAd);
-          
-          contentP.appendChild(advise);
-  
-        } else {
-  
-          var inputSeason = document.getElementById("inputSeasonM");
-          inputSeason.setAttribute("class","border border-danger form-control");
-          inputSeason.setAttribute("placeholder","El campo no se puede introducir en una pelicula");
-  
-        }
-
-        search = true;
-
-      }
-
-      var production = productions.next();
+          production.continue();
+			  }
+		  }
     }
   }
 }
@@ -2233,29 +2189,38 @@ function modifyProduction() {
 function deleteProduction() {
   var productionDelete = document.forms["delProduction"]["selectNameD"].value;
 
-  var video = VideoSystem.getInstance();
-  var productions = video.productions;
-  var production = productions.next();
-  while (production.done !== true){
-  
-    if (production.value.title == productionDelete){
+  var request = indexedDB.open(nameDB);
 
-      video.removeProduction(production.value);
+  request.onsuccess = function(event) {
 
-      var contentP = document.getElementById("principal");
+    var db = event.target.result;         
+    var objectStore = db.transaction(["producciones"],"readwrite").objectStore("producciones");
+
+    objectStore.openCursor().onsuccess = function(event) {
     
-      var advise = document.createElement("h5");
-      advise.setAttribute("class","text-center text-primary");
-      advise.setAttribute("style","width:100%");
-      var textAd = document.createTextNode("Produccion " + productionDelete + " Borrada del sistema");
-      advise.appendChild(textAd);
-        
-      contentP.appendChild(advise);
+      var production = event.target.result;
+
+      if (production) {
+
+        if (productionDelete == production.value.title) {
+
+          objectStore.delete(production.value.title);
+
+          var contentP = document.getElementById("principal");
+    
+          var advise = document.createElement("h5");
+          advise.setAttribute("class","text-center text-primary");
+          advise.setAttribute("style","width:100%");
+          var textAd = document.createTextNode("Produccion " + productionDelete + " Borrada del sistema");
+          advise.appendChild(textAd);
+
+          contentP.appendChild(advise);
+        }
+
+        production.continue();
+      }
       
     }
-      
-    var production = productions.next();
-    
   }
 
 }
@@ -2476,33 +2441,52 @@ function formPerson() {
 	inp0F2.setAttribute("class","form-control");
   inp0F2.setAttribute("placeholder","");
   
-  var video = VideoSystem.getInstance();
-	var actors = video.actors;
-	var actor = actors.next();
-	while (actor.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",actor.value.name + " " + actor.value.lastName1);
-    var textop = document.createTextNode(actor.value.name + " " + actor.value.lastName1);
-    option.appendChild(textop);
-    
-    inp0F2.appendChild(option);
+  request.onsuccess = function(event) {
 
-    var actor = actors.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["actores"],"readonly").objectStore("actores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+            
+      var actor = event.target.result;
+
+      if (actor) {
+
+        var option = document.createElement("option");
+        option.setAttribute("value",actor.value.name + " " + actor.value.lastName1);
+        var textop = document.createTextNode(actor.value.name + " " + actor.value.lastName1);
+        option.appendChild(textop);
+              
+        inp0F2.appendChild(option);
+        actor.continue();
+      }
+    }
   }
 
-  var directors = video.directors;
-	var director = directors.next();
-	while (director.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",director.value.name + " " + director.value.lastName1);
-    var textop = document.createTextNode(director.value.name + " " + director.value.lastName1);
-    option.appendChild(textop);
-    
-    inp0F2.appendChild(option);
+  request.onsuccess = function(event) {
 
-    var director = directors.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+            
+      var director = event.target.result;
+
+      if (director) {
+
+        var option = document.createElement("option");
+        option.setAttribute("value",director.value.name + " " + director.value.lastName1);
+        var textop = document.createTextNode(director.value.name + " " + director.value.lastName1);
+        option.appendChild(textop);
+        
+        inp0F2.appendChild(option);
+        director.continue();
+      }
+    }
   }
 
   var div1F2 = document.createElement("div");
@@ -2580,8 +2564,8 @@ function formPerson() {
 
   div2.appendChild(formModPe);
   formModPe.appendChild(div0F2);
-  div0F2.appendChild(inp0F2);
   div0F2.appendChild(lab0F2);
+  div0F2.appendChild(inp0F2);
 	formModPe.appendChild(div1F2);
 	div1F2.appendChild(lab1F2);
 	div1F2.appendChild(inp1F2);
@@ -2639,33 +2623,52 @@ function formPerson() {
   inp0F3.setAttribute("class","form-control");
   inp0F3.setAttribute("placeholder","");
    
-  var video = VideoSystem.getInstance();
-  var actors = video.actors;
-	var actor = actors.next();
-	while (actor.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",actor.value.name + " " + actor.value.lastName1);
-    var textop = document.createTextNode(actor.value.name + " " + actor.value.lastName1);
-    option.appendChild(textop);
-    
-    inp0F3.appendChild(option);
+  request.onsuccess = function(event) {
 
-    var actor = actors.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["actores"],"readonly").objectStore("actores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+            
+      var actor = event.target.result;
+
+      if (actor) {
+
+        var option = document.createElement("option");
+        option.setAttribute("value",actor.value.name + " " + actor.value.lastName1);
+        var textop = document.createTextNode(actor.value.name + " " + actor.value.lastName1);
+        option.appendChild(textop);
+              
+        inp0F3.appendChild(option);
+        actor.continue();
+      }
+    }
   }
 
-  var directors = video.directors;
-	var director = directors.next();
-	while (director.done !== true){
+  var request = indexedDB.open(nameDB);
 
-    var option = document.createElement("option");
-    option.setAttribute("value",director.value.name + " " + director.value.lastName1);
-    var textop = document.createTextNode(director.value.name + " " + director.value.lastName1);
-    option.appendChild(textop);
-    
-    inp0F3.appendChild(option);
+  request.onsuccess = function(event) {
 
-    var director = directors.next();
+    var db = event.target.result;         
+    var objectStore = db.transaction(["directores"],"readonly").objectStore("directores");
+    //Abre un cursor y reccorre los datos devueltos 
+    objectStore.openCursor().onsuccess = function(event) {
+            
+      var director = event.target.result;
+
+      if (director) {
+
+        var option = document.createElement("option");
+        option.setAttribute("value",director.value.name + " " + director.value.lastName1);
+        var textop = document.createTextNode(director.value.name + " " + director.value.lastName1);
+        option.appendChild(textop);
+        
+        inp0F3.appendChild(option);
+        director.continue();
+      }
+    }
   }
  
   var brDse = document.createElement ("button");
@@ -2726,6 +2729,19 @@ function insertPerson() {
       var actorNew = new Person(nameIn, lastname1In, date, lastname2In, imageIn,);
       video.addActor(actorNew);
 
+      //Ademas lo insertaremos en la base de datos
+      var request = indexedDB.open(nameDB);
+      
+      request.onsuccess = function(event) {
+
+        var db = event.target.result;         
+        
+        var addObject = db.transaction(["actores"],"readwrite").objectStore("actores");
+          
+        var addObjectStore = addObject.add(actorNew.getObject());
+        
+      }
+
       var contentP = document.getElementById("principal");
 
       var advise = document.createElement("h5");
@@ -2740,6 +2756,19 @@ function insertPerson() {
       
       var directorNew = new Person(nameIn, lastname1In, date, lastname2In, imageIn,);
       video.addDirector(directorNew);
+
+      //Ademas lo insertaremos en la base de datos
+      var request = indexedDB.open(nameDB);
+      
+      request.onsuccess = function(event) {
+
+        var db = event.target.result;         
+        
+        var addObject = db.transaction(["directores"],"readwrite").objectStore("directores");
+          
+        var addObjectStore = addObject.add(directorNew.getObject());
+        
+      }
 
       var contentP = document.getElementById("principal");
 
@@ -2790,121 +2819,168 @@ function modifyPerson() {
 
   if ((nameIn !== "") && (lastname1In !== "")) {
     
-    var video = VideoSystem.getInstance();
-    var actors = video.actors;
-    var actor = actors.next();
-    while (actor.done !== true){
-      console.log("Entra a actores");
-      if (actor.value.name + " " + actor.value.lastName1 == personModify) {
-        console.log("Entra al if actores");
-        if (nameIn != "") {
-          console.log("Entra a cambio de nombre");
-          console.log(actor.value.name);
-          actor.value.name = nameIn;
+    var request1 = indexedDB.open(nameDB);
+
+    request1.onsuccess = function(event) {
+
+	  var db = event.target.result;         
+		var objectStore = db.transaction(["actores"],"readwrite").objectStore("actores");
+
+		objectStore.openCursor().onsuccess = function(event) {
+			
+			var actor = event.target.result;
+
+			if (actor) {
+
+        if (actor.value.name+" "+actor.value.lastName1 == personModify){
+
+          if (nameIn+" "+lastname1In != actor.name+" "+actor.lastName1) {
+            objectStore.delete(actor.value.name);
+          }
+              
+          var updateData = actor.value;
+              
+          updateData.name = nameIn;
+          updateData.lastName1 = lastname1In;
+          updateData.lastName2 = lastname2In;
+          updateData.born = date;
+          updateData.image = imageIn;
+
+          objectStore.put(updateData);
+
+          var contentP = document.getElementById("principal");
+  
+          var advise = document.createElement("h5");
+          advise.setAttribute("class","text-center text-primary");
+          advise.setAttribute("style","width:100%");
+          var textAd = document.createTextNode("Actor/a " + personModify + " modificada");
+          advise.appendChild(textAd);
+              
+          contentP.appendChild(advise);
         }
-
-        if (lastname1In != "") {
-          actor.value.lastname1 = lastname1In;
-        }
-
-        if (lastname2In != "") {
-          actor.value.lastname2 = lastname2In;
-        }
-
-        if (bornIn != "") {
-          actor.value.born = date;
-        }
-
-        if (imageIn != "") {
-          actor.value.picture = imageIn;
-        }
-
-      }
-
-      var actor = actors.next();
-    }
-
-    var directors = video.directors;
-    var director = directors.next();
-    while (director.done !== true){
-      console.log("Entra a directores");
-      if (director.value.name + " " + director.value.lastName1 == personModify) {
-
-        if (nameIn != "") {
-          director.value.name = nameIn;
-        }
-
-        if (lastname1In != "") {
-          director.lastname1 = lastname1In;
-        }
-
-        if (lastname2In != "") {
-          director.value.lastname2 = lastname2In;
-        }
-
-        if (bornIn != "") {
-          director.value.born = date;
-        }
-
-        if (imageIn != "") {
-          director.value.picture = imageIn;
-        }
-
-      }
-
-      var director = directors.next();
-    }
-    
+        actor.continue();
+			}
+		}
   }
+  
+  var request2 = indexedDB.open(nameDB);
+
+  request2.onsuccess = function(event) {
+
+	var db = event.target.result;         
+	var objectStore = db.transaction(["directores"],"readwrite").objectStore("directores");
+
+		objectStore.openCursor().onsuccess = function(event) {
+			
+			var director = event.target.result;
+
+			if (director) {
+
+        if (director.value.name+" "+director.value.lastName1 == personModify){
+
+          if (nameIn+" "+lastname1In != director.name+" "+director.lastName1) {
+            objectStore.delete(director.value.name);
+          }
+              
+          var updateData = director.value;
+              
+          updateData.name = nameIn;
+          updateData.lastName1 = lastname1In;
+          updateData.lastName2 = lastname2In;
+          updateData.born = date;
+          updateData.image = imageIn;
+
+          objectStore.put(updateData);
+
+          var contentP = document.getElementById("principal");
+  
+          var advise = document.createElement("h5");
+          advise.setAttribute("class","text-center text-primary");
+          advise.setAttribute("style","width:100%");
+          var textAd = document.createTextNode("Director/a " + personModify + " modificada");
+          advise.appendChild(textAd);
+              
+          contentP.appendChild(advise);
+        }
+        director.continue();
+			}
+		}
+  }
+
+  }
+    
 }
 
 function deletePerson() {
   var personDelete = document.forms["delPerson"]["selectNameD"].value;
 
-  var video = VideoSystem.getInstance();
-  var actors = video.actors;
-	var actor = actors.next();
-	while (actor.done !== true){
+  var request1 = indexedDB.open(nameDB);
 
-    if (actor.value.name + " " + actor.value.lastName1 == personDelete){
+  request1.onsuccess = function(event) {
 
-      video.removeActor(actor.value);
+    var db = event.target.result;         
+    var objectStore = db.transaction(["actores"],"readwrite").objectStore("actores");
 
-      var contentP = document.getElementById("principal");
+    objectStore.openCursor().onsuccess = function(event) {
     
-      var advise = document.createElement("h5");
-      advise.setAttribute("class","text-center text-primary");
-      advise.setAttribute("style","width:100%");
-      var textAd = document.createTextNode("Actor/a " + personDelete + " Borrada del sistema");
-      advise.appendChild(textAd);
+      var actor = event.target.result;
+
+      if (actor) {
+
+        if (personDelete == actor.value.name+" "+actor.value.lastName1) {
+
+          objectStore.delete(actor.value.name);
+
+          var contentP = document.getElementById("principal");
+    
+          var advise = document.createElement("h5");
+          advise.setAttribute("class","text-center text-primary");
+          advise.setAttribute("style","width:100%");
+          var textAd = document.createTextNode("Actor/a " + personDelete + " Borrado del sistema");
+          advise.appendChild(textAd);
+
+          contentP.appendChild(advise);
+        }
+
+        actor.continue();
+      }
       
     }
-
-    var actor = actors.next();
   }
 
-  var directors = video.directors;
-	var director = directors.next();
-	while (director.done !== true){
+  var request2 = indexedDB.open(nameDB);
 
-    if (director.value.name + " " + director.value.lastName1 == personDelete){
+  request2.onsuccess = function(event) {
 
-      video.removeDirector(director.value);
+    var db = event.target.result;         
+    var objectStore = db.transaction(["directores"],"readwrite").objectStore("directores");
 
-      var contentP = document.getElementById("principal");
+    objectStore.openCursor().onsuccess = function(event) {
     
-      var advise = document.createElement("h5");
-      advise.setAttribute("class","text-center text-primary");
-      advise.setAttribute("style","width:100%");
-      var textAd = document.createTextNode("Director/a " + personDelete + " Borrado del sistema");
-      advise.appendChild(textAd);
+      var director = event.target.result;
+
+      if (director) {
+ 
+        if (personDelete == director.value.name+" "+director.value.lastName1) {
+    
+          objectStore.delete(director.value.name);
+
+          var contentP = document.getElementById("principal");
+    
+          var advise = document.createElement("h5");
+          advise.setAttribute("class","text-center text-primary");
+          advise.setAttribute("style","width:100%");
+          var textAd = document.createTextNode("Director/a " + personDelete + " Borrado del sistema");
+          advise.appendChild(textAd);
+
+          contentP.appendChild(advise);
+        }
+
+        director.continue();
+      }
       
     }
-
-    var director = directors.next();
   }
-    
-  contentP.appendChild(advise);
 }
 
 

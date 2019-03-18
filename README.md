@@ -19,3 +19,8 @@ EL formulario producciones cambiado y muestra lo que tiene asignado
 
 #Version 2.4
 Formulario producciones terminado lo asignado y no asignado
+
+#Version 3.0
+Casi implementado por completo carga inicial hecha, pinturas desde indexedDB hecho,
+pintura e inserccion con formularios hecho, relaciones de inicio hechos
+*SOLO ESTA PENDIENTE LAS RELACIONES DESDE FORMULARIO PRODUCTIONS*
